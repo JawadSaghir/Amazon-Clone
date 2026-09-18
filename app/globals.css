@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #f7f1e8;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(232, 165, 40, 0.16), transparent 34%),
+    linear-gradient(225deg, rgba(22, 114, 91, 0.11), transparent 30%),
+    #f7f1e8;
+  color: #171412;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .panel {
+    @apply border border-coal/10 bg-white/80 shadow-panel backdrop-blur;
+  }
+
+  .ink-button {
+    @apply inline-flex items-center justify-center gap-2 bg-coal px-4 py-2 text-sm font-bold text-paper transition hover:bg-indigoInk disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .brass-button {
+    @apply inline-flex items-center justify-center gap-2 bg-saffron px-4 py-2 text-sm font-bold text-coal transition hover:bg-[#f0b84a] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .link-ink {
+    @apply font-semibold text-indigoInk underline-offset-4 hover:underline;
+  }
+}
