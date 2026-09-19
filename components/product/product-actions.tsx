@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Lock, ShoppingBag, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
@@ -11,6 +12,7 @@ import type { Product } from "@/types";
 
 export function ProductActions({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
+  const router = useRouter();
   const add = useCartStore((state) => state.add);
   const wishlist = useWishlistStore((state) => state);
   const pushRecent = useRecentStore((state) => state.push);
@@ -44,7 +46,15 @@ export function ProductActions({ product }: { product: Product }) {
         <ShoppingBag className="h-4 w-4" />
         Add to cart
       </button>
-      <button type="button" onClick={() => add(product, quantity)} className="ink-button mt-2 w-full">
+      <button
+        type="button"
+        onClick={() => {
+          add(product, quantity);
+          pushRecent(product.id);
+          router.push("/checkout");
+        }}
+        className="ink-button mt-2 w-full"
+      >
         <Zap className="h-4 w-4" />
         Buy now
       </button>

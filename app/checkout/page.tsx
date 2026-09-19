@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
@@ -10,6 +11,7 @@ import { formatMoney } from "@/lib/utils";
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const { items, clear } = useCartStore();
   const [couponCode, setCouponCode] = useState("8XWELCOME");
   const [message, setMessage] = useState("");
@@ -41,7 +43,8 @@ export default function CheckoutPage() {
       return;
     }
     clear();
-    setMessage(`Order ${data.orderId} created. Test checkout URL: ${data.checkoutUrl}`);
+    setMessage(`Order ${data.orderId} created. Redirecting to confirmation...`);
+    router.push(`${data.checkoutUrl}?orderId=${encodeURIComponent(data.orderId)}`);
   }
 
   if (!session) {
