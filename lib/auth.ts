@@ -10,14 +10,14 @@ const demoUsers = [
     name: "Demo Customer",
     email: "customer@8x.test",
     role: "CUSTOMER",
-    passwordHash: bcrypt.hashSync("password123", 10)
+    passwordHash: bcrypt.hashSync("8xDemo!Market2026", 10)
   },
   {
     id: "demo-admin",
     name: "Demo Admin",
     email: "admin@8x.test",
     role: "ADMIN",
-    passwordHash: bcrypt.hashSync("password123", 10)
+    passwordHash: bcrypt.hashSync("8xDemo!Market2026", 10)
   }
 ];
 

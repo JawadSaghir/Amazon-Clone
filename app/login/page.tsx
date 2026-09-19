@@ -44,12 +44,12 @@ function LoginForm() {
         </Link>
         <h1 className="text-2xl font-black">Sign in</h1>
         <input name="email" type="email" defaultValue="customer@8x.test" className="border border-coal/15 bg-white p-3" />
-        <input name="password" type="password" defaultValue="password123" className="border border-coal/15 bg-white p-3" />
+        <input name="password" type="password" defaultValue="8xDemo!Market2026" className="border border-coal/15 bg-white p-3" />
         <button className="brass-button" type="submit">
           Sign in
         </button>
         {error && <p className="text-sm font-bold text-pomegranate">{error}</p>}
-        <p className="text-sm text-coal/60">Demo admin: admin@8x.test / password123</p>
+        <p className="text-sm text-coal/60">Demo admin: admin@8x.test / 8xDemo!Market2026</p>
       </form>
     </div>
   );

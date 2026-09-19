@@ -31,12 +31,12 @@ Detailed specs are in [specs](specs/README.md):
 Customer:
 
 - `customer@8x.test`
-- `password123`
+- `8xDemo!Market2026`
 
 Admin:
 
 - `admin@8x.test`
-- `password123`
+- `8xDemo!Market2026`
 
 ## Setup
 
