@@ -4,16 +4,14 @@
 
 :root {
   color-scheme: light;
-  background: #f7f1e8;
+  background: #eaeded;
 }
 
 body {
   min-height: 100vh;
-  background:
-    linear-gradient(135deg, rgba(232, 165, 40, 0.16), transparent 34%),
-    linear-gradient(225deg, rgba(22, 114, 91, 0.11), transparent 30%),
-    #f7f1e8;
-  color: #171412;
+  background: #eaeded;
+  color: #0f1111;
+  font-family: "Amazon Ember", Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
 button,
@@ -25,22 +23,22 @@ textarea {
 
 @layer components {
   .page-shell {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-amazon px-3 sm:px-4;
   }
 
   .panel {
-    @apply border border-coal/10 bg-white/80 shadow-panel backdrop-blur;
+    @apply rounded-sm border border-[#d5d9d9] bg-white shadow-panel;
   }
 
   .ink-button {
-    @apply inline-flex items-center justify-center gap-2 bg-coal px-4 py-2 text-sm font-bold text-paper transition hover:bg-indigoInk disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-amazonOrange px-4 py-2 text-sm font-bold text-coal shadow-brass transition hover:bg-[#fa8900] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .brass-button {
-    @apply inline-flex items-center justify-center gap-2 bg-saffron px-4 py-2 text-sm font-bold text-coal transition hover:bg-[#f0b84a] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-amazonGold px-4 py-2 text-sm font-bold text-coal shadow-brass transition hover:bg-[#f7ca00] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .link-ink {
-    @apply font-semibold text-indigoInk underline-offset-4 hover:underline;
+    @apply font-semibold text-indigoInk hover:text-pomegranate hover:underline;
   }
 }
