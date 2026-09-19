@@ -1,5 +1,6 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -33,27 +34,17 @@ function LoginForm() {
     setSubmitting(true);
     setError("");
     const form = new FormData(event.currentTarget);
-    const csrfResponse = await fetch("/api/auth/csrf");
-    const { csrfToken } = (await csrfResponse.json()) as { csrfToken: string };
-    const body = new URLSearchParams({
-      csrfToken,
+    const result = await signIn("credentials", {
       email: String(form.get("email")),
       password: String(form.get("password")),
-      redirect: "false",
       callbackUrl,
-      json: "true"
+      redirect: true
     });
-    const result = await fetch("/api/auth/callback/credentials?json=true", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body
-    });
-    if (!result.ok) {
+
+    if (result?.error) {
       setError("Invalid email or password.");
       setSubmitting(false);
-      return;
     }
-    window.location.replace(callbackUrl);
   }
 
   if (status === "authenticated") {
@@ -98,6 +89,9 @@ function normalizeCallbackUrl(value: string | null) {
   try {
     const parsed = new URL(value, window.location.origin);
     if (parsed.origin !== window.location.origin) return "/dashboard";
+    if (parsed.pathname === "/login" || parsed.pathname === "/api/auth/signin") {
+      return normalizeCallbackUrl(parsed.searchParams.get("callbackUrl"));
+    }
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
     return "/dashboard";
