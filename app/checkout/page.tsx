@@ -58,35 +58,36 @@ export default function CheckoutPage() {
   }
 
   return (
-    <form onSubmit={submit} className="page-shell grid gap-6 py-8 lg:grid-cols-[1fr_340px]">
-      <section className="panel grid gap-4 p-5">
-        <h1 className="text-3xl font-black">Checkout</h1>
-        <input name="fullName" required placeholder="Full name" className="border border-coal/15 bg-white p-3" />
-        <input name="phone" required placeholder="Phone" className="border border-coal/15 bg-white p-3" />
-        <input name="line1" required placeholder="Address line" className="border border-coal/15 bg-white p-3" />
+    <form onSubmit={submit} className="page-shell grid gap-5 py-6 lg:grid-cols-[1fr_340px]">
+      <section className="grid gap-4 rounded-sm border border-[#d5d9d9] bg-white p-5">
+        <h1 className="text-3xl font-normal">Checkout</h1>
+        <h2 className="border-b border-[#d5d9d9] pb-2 text-lg font-bold text-pomegranate">1. Delivery address</h2>
+        <input name="fullName" required placeholder="Full name" className="rounded border border-[#d5d9d9] bg-white p-3" />
+        <input name="phone" required placeholder="Phone" className="rounded border border-[#d5d9d9] bg-white p-3" />
+        <input name="line1" required placeholder="Address line" className="rounded border border-[#d5d9d9] bg-white p-3" />
         <div className="grid gap-4 sm:grid-cols-2">
-          <input name="city" required placeholder="City" className="border border-coal/15 bg-white p-3" />
-          <input name="region" required placeholder="State / Province" className="border border-coal/15 bg-white p-3" />
-          <input name="postalCode" required placeholder="Postal code" className="border border-coal/15 bg-white p-3" />
-          <select name="country" className="border border-coal/15 bg-white p-3">
+          <input name="city" required placeholder="City" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <input name="region" required placeholder="State / Province" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <input name="postalCode" required placeholder="Postal code" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <select name="country" className="rounded border border-[#d5d9d9] bg-white p-3">
             <option>India</option>
             <option>Pakistan</option>
           </select>
         </div>
       </section>
-      <aside className="panel h-fit p-5">
-        <h2 className="text-xl font-black">Review order</h2>
+      <aside className="h-fit rounded-sm border border-[#d5d9d9] bg-white p-5">
+        <h2 className="text-xl font-bold">Order Summary</h2>
         <label className="mt-4 block text-sm font-bold">
           Coupon
-          <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} className="mt-1 w-full border border-coal/15 bg-white p-3" />
+          <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} className="mt-1 w-full rounded border border-[#d5d9d9] bg-white p-2" />
         </label>
         <Summary label="Subtotal" value={totals.subtotalInr} />
         <Summary label="Discount" value={-totals.discountInr} />
         <Summary label="Shipping" value={totals.shippingInr} />
         <Summary label="Tax" value={totals.taxInr} />
         <div className="mt-4 border-t border-coal/10 pt-4">
-          <p className="text-sm font-bold text-coal/60">Total</p>
-          <p className="text-2xl font-black">{formatMoney(totals.totalInr)}</p>
+          <p className="text-sm font-bold text-coal/60">Order total</p>
+          <p className="text-xl font-bold text-pomegranate">{formatMoney(totals.totalInr)}</p>
         </div>
         <button type="submit" className="brass-button mt-5 w-full" disabled={items.length === 0}>
           Create test order
