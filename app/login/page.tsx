@@ -1,10 +1,11 @@
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { FormEvent, useEffect, useState } from "react";
+
+import { useDemoSession } from "@/components/providers/session-store";
 
 export default function LoginPage() {
   return (
@@ -16,7 +17,7 @@ export default function LoginPage() {
 
 function LoginForm() {
   const params = useSearchParams();
-  const { status } = useSession();
+  const { status } = useDemoSession();
   const callbackUrl = normalizeCallbackUrl(params.get("callbackUrl"));
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -32,13 +33,22 @@ function LoginForm() {
     setSubmitting(true);
     setError("");
     const form = new FormData(event.currentTarget);
-    const result = await signIn("credentials", {
+    const csrfResponse = await fetch("/api/auth/csrf");
+    const { csrfToken } = (await csrfResponse.json()) as { csrfToken: string };
+    const body = new URLSearchParams({
+      csrfToken,
       email: String(form.get("email")),
       password: String(form.get("password")),
-      redirect: false,
-      callbackUrl
+      redirect: "false",
+      callbackUrl,
+      json: "true"
     });
-    if (result?.error) {
+    const result = await fetch("/api/auth/callback/credentials?json=true", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body
+    });
+    if (!result.ok) {
       setError("Invalid email or password.");
       setSubmitting(false);
       return;

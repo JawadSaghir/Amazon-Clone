@@ -1,19 +1,19 @@
 "use client";
 
 import { ChevronDown, Grid2X2, MapPin, Menu, Search, ShoppingCart } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
+import { useDemoSession } from "@/components/providers/session-store";
 import { categories } from "@/lib/catalog";
 
 export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
   const storedCartCount = useCartStore((state) => state.count());
   const cartCount = mounted ? storedCartCount : 0;
-  const { data: session } = useSession();
+  const { data: session } = useDemoSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -25,6 +25,17 @@ export function SiteHeader() {
   function onSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     router.push(`/search?q=${encodeURIComponent(query)}`);
+  }
+
+  async function signOut() {
+    const response = await fetch("/api/auth/csrf");
+    const { csrfToken } = (await response.json()) as { csrfToken: string };
+    await fetch("/api/auth/signout?json=true", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ csrfToken, callbackUrl: "/", json: "true" })
+    });
+    window.location.assign("/");
   }
 
   const SearchForm = ({ compact = false }: { compact?: boolean }) => (
@@ -80,7 +91,7 @@ export function SiteHeader() {
             <ChevronDown className="h-3 w-3" />
           </Link>
           <Link href="/dashboard" className="hidden h-full rounded-sm border border-transparent px-2 py-1 leading-tight hover:border-white sm:block">
-            <span className="block text-[11px] font-semibold text-white">Hello, {session?.user.name?.split(" ")[0] ?? "sign in"}</span>
+            <span className="block text-[11px] font-semibold text-white">Hello, {session?.user?.name?.split(" ")[0] ?? "sign in"}</span>
             <span className="flex items-center gap-1 text-sm font-black">
               Account & Lists
               <ChevronDown className="h-3 w-3" />
@@ -91,7 +102,7 @@ export function SiteHeader() {
             <span className="block text-sm font-black">& Orders</span>
           </Link>
           {session ? (
-            <button type="button" onClick={() => signOut({ callbackUrl: "/" })} className="hidden h-full rounded-sm border border-transparent px-2 py-1 text-xs font-bold hover:border-white xl:block">
+            <button type="button" onClick={signOut} className="hidden h-full rounded-sm border border-transparent px-2 py-1 text-xs font-bold hover:border-white xl:block">
               Sign out
             </button>
           ) : (

@@ -1,16 +1,16 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
+import { useDemoSession } from "@/components/providers/session-store";
 import { calculateTotals } from "@/lib/checkout";
 import { formatMoney } from "@/lib/utils";
 
 export default function CheckoutPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useDemoSession();
   const router = useRouter();
   const { items, clear } = useCartStore();
   const [couponCode, setCouponCode] = useState("8XWELCOME");
@@ -45,6 +45,16 @@ export default function CheckoutPage() {
     clear();
     setMessage(`Order ${data.orderId} created. Redirecting to confirmation...`);
     router.push(`${data.checkoutUrl}?orderId=${encodeURIComponent(data.orderId)}`);
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="page-shell py-16 text-center">
+        <div className="panel mx-auto max-w-xl p-10">
+          <h1 className="text-3xl font-black">Loading checkout...</h1>
+        </div>
+      </div>
+    );
   }
 
   if (!session) {
