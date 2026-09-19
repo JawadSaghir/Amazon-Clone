@@ -5,16 +5,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        coal: "#171412",
-        paper: "#f7f1e8",
-        saffron: "#e8a528",
-        indigoInk: "#183153",
-        basil: "#16725b",
-        pomegranate: "#b83232"
+        coal: "#0f1111",
+        paper: "#eaeded",
+        saffron: "#febd69",
+        indigoInk: "#007185",
+        basil: "#067d62",
+        pomegranate: "#b12704",
+        amazonNavy: "#131921",
+        amazonBlue: "#232f3e",
+        amazonLight: "#37475a",
+        amazonOrange: "#ff9900",
+        amazonGold: "#ffd814"
       },
       boxShadow: {
-        brass: "0 18px 45px rgba(69, 50, 25, 0.16)",
-        panel: "0 10px 30px rgba(23, 20, 18, 0.10)"
+        brass: "0 2px 5px rgba(213, 217, 217, 0.5)",
+        panel: "0 1px 3px rgba(15, 17, 17, 0.15)",
+        dropdown: "0 4px 14px rgba(15, 17, 17, 0.25)"
+      },
+      fontFamily: {
+        amazon: ['"Amazon Ember"', "Arial", "ui-sans-serif", "system-ui", "sans-serif"]
+      },
+      maxWidth: {
+        amazon: "1500px"
       }
     }
   },
