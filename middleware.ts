@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request);
   }
 
-  if ((path.startsWith("/dashboard") || path.startsWith("/checkout")) && !token) {
+  if (path.startsWith("/dashboard") && !token) {
     return redirectToLogin(request);
   }
 
@@ -27,5 +27,5 @@ function redirectToLogin(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/checkout"]
+  matcher: ["/dashboard/:path*", "/admin/:path*"]
 };
