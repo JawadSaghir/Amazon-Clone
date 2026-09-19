@@ -1,19 +1,18 @@
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAuthSecret } from "@/lib/auth-secret";
+import { getApiSessionUser } from "@/lib/api-session";
 import { getOrdersForUser, resolveCheckoutUser } from "@/lib/orders";
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: getAuthSecret() });
-  if (!token) {
+  const sessionUser = await getApiSessionUser(request);
+  if (!sessionUser) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
   }
 
   const user = await resolveCheckoutUser({
-    email: token.email,
-    name: token.name,
-    role: typeof token.role === "string" ? token.role : null
+    email: sessionUser.email,
+    name: sessionUser.name,
+    role: sessionUser.role
   });
   if (!user) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
