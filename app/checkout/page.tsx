@@ -79,6 +79,20 @@ export default function CheckoutPage() {
     );
   }
 
+  if (items.length === 0) {
+    return (
+      <div className="page-shell py-16 text-center">
+        <div className="panel mx-auto max-w-xl p-10">
+          <h1 className="text-3xl font-black">Your cart is empty</h1>
+          <p className="mt-3 text-coal/65">Add an item before creating a test order.</p>
+          <Link href="/search" className="brass-button mt-6">
+            Continue shopping
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={submit} className="page-shell grid gap-5 py-6 lg:grid-cols-[1fr_340px]">
       <section className="grid gap-4 rounded-sm border border-[#d5d9d9] bg-white p-5">
