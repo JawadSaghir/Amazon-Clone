@@ -1,10 +1,10 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 export default function LoginPage() {
   return (
@@ -15,13 +15,22 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
+  const { status } = useSession();
   const callbackUrl = normalizeCallbackUrl(params.get("callbackUrl"));
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      window.location.replace(callbackUrl);
+    }
+  }, [callbackUrl, status]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSubmitting(true);
+    setError("");
     const form = new FormData(event.currentTarget);
     const result = await signIn("credentials", {
       email: String(form.get("email")),
@@ -31,9 +40,27 @@ function LoginForm() {
     });
     if (result?.error) {
       setError("Invalid email or password.");
+      setSubmitting(false);
       return;
     }
-    router.push(callbackUrl);
+    window.location.replace(callbackUrl);
+  }
+
+  if (status === "authenticated") {
+    return (
+      <div className="page-shell py-16">
+        <div className="panel mx-auto grid max-w-md gap-4 p-6">
+          <Link href="/" className="text-3xl font-black">
+            8x<span className="text-saffron">market</span>
+          </Link>
+          <h1 className="text-2xl font-black">You are signed in</h1>
+          <p className="text-sm text-coal/60">Redirecting to your account...</p>
+          <Link href={callbackUrl} className="brass-button">
+            Continue
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -45,8 +72,8 @@ function LoginForm() {
         <h1 className="text-2xl font-black">Sign in</h1>
         <input name="email" type="email" defaultValue="customer@8x.test" className="border border-coal/15 bg-white p-3" />
         <input name="password" type="password" defaultValue="8xDemo!Market2026" className="border border-coal/15 bg-white p-3" />
-        <button className="brass-button" type="submit">
-          Sign in
+        <button className="brass-button disabled:cursor-wait disabled:opacity-70" type="submit" disabled={submitting || status === "loading"}>
+          {submitting ? "Signing in..." : "Sign in"}
         </button>
         {error && <p className="text-sm font-bold text-pomegranate">{error}</p>}
         <p className="text-sm text-coal/60">Demo admin: admin@8x.test / 8xDemo!Market2026</p>
