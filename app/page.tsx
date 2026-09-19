@@ -9,43 +9,59 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="page-shell grid gap-8 py-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="panel bg-coal p-8 text-paper sm:p-12">
-          <p className="text-sm font-black uppercase tracking-[0.3em] text-saffron">8x Marketplace</p>
-          <h1 className="mt-5 max-w-3xl text-4xl font-black tracking-tight sm:text-6xl">A regional shopping engine with INR and PKR clarity.</h1>
-          <p className="mt-5 max-w-2xl text-paper/75">
-            Discover electronics, home goods, fashion, grocery, beauty, and fitness products through a fast full-stack marketplace experience.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+      <section className="bg-gradient-to-b from-amazonBlue via-[#3f5268] to-paper">
+        <div className="page-shell pb-24 pt-10">
+          <div className="max-w-3xl text-white">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-saffron">8x Great Regional Sale</p>
+            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Shop more. Compare faster. Pay in INR with PKR clarity.</h1>
+            <p className="mt-4 max-w-2xl text-white/80">
+              Electronics, fashion, kitchen, grocery, beauty, and sports essentials arranged in a dense marketplace built for quick buying.
+            </p>
+          </div>
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/search" className="brass-button">
               Shop catalog
             </Link>
-            <Link href="/search?deal=flash" className="border border-paper/25 px-4 py-2 text-sm font-bold hover:bg-white/10">
+            <Link href="/search?deal=flash" className="rounded-full bg-white px-4 py-2 text-sm font-bold text-coal hover:bg-slate-100">
               View deals
             </Link>
           </div>
         </div>
-        <div className="grid gap-4">
-          <div className="panel p-5">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-basil">Today&apos;s ledger</p>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <Metric label="Products" value={catalog.length} />
-              <Metric label="Deals" value={deals.length} />
-              <Metric label="Categories" value={categories.length} />
-            </div>
+      </section>
+
+      <section className="page-shell -mt-16 grid gap-4 lg:grid-cols-3">
+        <div className="panel p-5">
+          <h2 className="text-xl font-bold">Shop by department</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            {categories.slice(0, 4).map((category) => (
+              <Link key={category} href={`/search?category=${encodeURIComponent(category)}`} className="bg-slate-100 p-4 font-bold hover:bg-slate-200">
+                {category}
+              </Link>
+            ))}
           </div>
-          <div className="panel p-5">
-            <p className="font-black">Use coupon 8XWELCOME</p>
-            <p className="mt-2 text-sm text-coal/65">Get 8% off up to INR 750. Totals show INR and PKR at checkout.</p>
+        </div>
+        <div className="panel p-5">
+          <h2 className="text-xl font-bold">Today&apos;s snapshot</h2>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <Metric label="Products" value={catalog.length} />
+            <Metric label="Deals" value={deals.length} />
+            <Metric label="Categories" value={categories.length} />
           </div>
+        </div>
+        <div className="panel p-5">
+          <h2 className="text-xl font-bold">Coupon corner</h2>
+          <p className="mt-3 text-sm text-coal/70">Use <span className="font-black">8XWELCOME</span> for 8% off up to INR 750. Totals show INR and PKR at checkout.</p>
+          <Link href="/cart" className="brass-button mt-5 w-full">
+            Go to cart
+          </Link>
         </div>
       </section>
 
       <section className="page-shell py-8">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-basil">Featured</p>
-            <h2 className="text-2xl font-black">Fast-moving shelves</h2>
+            <p className="text-sm font-bold text-pomegranate">Featured</p>
+            <h2 className="text-2xl font-bold">Fast-moving shelves</h2>
           </div>
           <Link href="/search" className="link-ink">
             See all
@@ -56,8 +72,8 @@ export default function HomePage() {
 
       <section className="page-shell py-8">
         <div className="mb-4">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-pomegranate">Live deals</p>
-          <h2 className="text-2xl font-black">Marked-down picks</h2>
+          <p className="text-sm font-bold text-pomegranate">Live deals</p>
+          <h2 className="text-2xl font-bold">Marked-down picks</h2>
         </div>
         <ProductGrid products={deals} />
       </section>
@@ -67,9 +83,9 @@ export default function HomePage() {
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-paper p-4">
-      <p className="text-2xl font-black text-coal">{value}</p>
-      <p className="text-xs font-bold uppercase text-coal/50">{label}</p>
+    <div className="bg-slate-100 p-3">
+      <p className="text-2xl font-bold text-coal">{value}</p>
+      <p className="text-xs font-bold text-coal/50">{label}</p>
     </div>
   );
 }
