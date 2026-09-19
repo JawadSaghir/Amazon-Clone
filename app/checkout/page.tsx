@@ -15,36 +15,45 @@ export default function CheckoutPage() {
   const { items, clear } = useCartStore();
   const [couponCode, setCouponCode] = useState("8XWELCOME");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const totals = calculateTotals(items.map((item) => ({ productId: item.product.id, quantity: item.quantity })), couponCode);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSubmitting(true);
+    setMessage("");
     const form = new FormData(event.currentTarget);
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
-        couponCode,
-        address: {
-          fullName: String(form.get("fullName")),
-          phone: String(form.get("phone")),
-          line1: String(form.get("line1")),
-          city: String(form.get("city")),
-          region: String(form.get("region")),
-          postalCode: String(form.get("postalCode")),
-          country: form.get("country")
-        }
-      })
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data.message ?? "Checkout failed.");
-      return;
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+          couponCode,
+          address: {
+            fullName: String(form.get("fullName")),
+            phone: String(form.get("phone")),
+            line1: String(form.get("line1")),
+            city: String(form.get("city")),
+            region: String(form.get("region")),
+            postalCode: String(form.get("postalCode")),
+            country: form.get("country")
+          }
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setMessage(data.message ?? "Checkout failed.");
+        setSubmitting(false);
+        return;
+      }
+      clear();
+      setMessage(`Order ${data.orderId} created. Redirecting to confirmation...`);
+      router.push(`${data.checkoutUrl}?orderId=${encodeURIComponent(data.orderId)}`);
+    } catch {
+      setMessage("Checkout failed. Please try again.");
+      setSubmitting(false);
     }
-    clear();
-    setMessage(`Order ${data.orderId} created. Redirecting to confirmation...`);
-    router.push(`${data.checkoutUrl}?orderId=${encodeURIComponent(data.orderId)}`);
   }
 
   if (status === "loading") {
@@ -75,14 +84,14 @@ export default function CheckoutPage() {
       <section className="grid gap-4 rounded-sm border border-[#d5d9d9] bg-white p-5">
         <h1 className="text-3xl font-normal">Checkout</h1>
         <h2 className="border-b border-[#d5d9d9] pb-2 text-lg font-bold text-pomegranate">1. Delivery address</h2>
-        <input name="fullName" required placeholder="Full name" className="rounded border border-[#d5d9d9] bg-white p-3" />
-        <input name="phone" required placeholder="Phone" className="rounded border border-[#d5d9d9] bg-white p-3" />
-        <input name="line1" required placeholder="Address line" className="rounded border border-[#d5d9d9] bg-white p-3" />
+        <input name="fullName" required defaultValue="Demo Customer" placeholder="Full name" className="rounded border border-[#d5d9d9] bg-white p-3" />
+        <input name="phone" required defaultValue="03001234567" placeholder="Phone" className="rounded border border-[#d5d9d9] bg-white p-3" />
+        <input name="line1" required defaultValue="12 Market Road" placeholder="Address line" className="rounded border border-[#d5d9d9] bg-white p-3" />
         <div className="grid gap-4 sm:grid-cols-2">
-          <input name="city" required placeholder="City" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <input name="region" required placeholder="State / Province" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <input name="postalCode" required placeholder="Postal code" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <select name="country" className="rounded border border-[#d5d9d9] bg-white p-3">
+          <input name="city" required defaultValue="Lahore" placeholder="City" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <input name="region" required defaultValue="Punjab" placeholder="State / Province" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <input name="postalCode" required defaultValue="54000" placeholder="Postal code" className="rounded border border-[#d5d9d9] bg-white p-3" />
+          <select name="country" defaultValue="Pakistan" className="rounded border border-[#d5d9d9] bg-white p-3">
             <option>India</option>
             <option>Pakistan</option>
           </select>
@@ -102,8 +111,8 @@ export default function CheckoutPage() {
           <p className="text-sm font-bold text-coal/60">Order total</p>
           <p className="text-xl font-bold text-pomegranate">{formatMoney(totals.totalInr)}</p>
         </div>
-        <button type="submit" className="brass-button mt-5 w-full" disabled={items.length === 0}>
-          Create test order
+        <button type="submit" className="brass-button mt-5 w-full disabled:cursor-wait disabled:opacity-70" disabled={items.length === 0 || submitting}>
+          {submitting ? "Creating order..." : "Create test order"}
         </button>
         {message && <p className="mt-4 text-sm font-bold text-basil">{message}</p>}
       </aside>

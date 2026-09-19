@@ -1,14 +1,15 @@
-import { getServerSession } from "next-auth";
+import { getToken } from "next-auth/jwt";
+import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { authOptions } from "@/lib/auth";
+import { getAuthSecret } from "@/lib/auth-secret";
 import { getProductById } from "@/lib/catalog";
 import { calculateTotals } from "@/lib/checkout";
 import { checkoutSchema } from "@/lib/validators";
 
-export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+export async function POST(request: NextRequest) {
+  const token = await getToken({ req: request, secret: getAuthSecret() });
+  if (!token) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
   }
 

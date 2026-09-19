@@ -26,14 +26,18 @@ export function SessionStoreProvider({ children }: { children: ReactNode }) {
 
   async function refresh() {
     setStatus("loading");
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      const response = await fetch("/api/auth/session", { cache: "no-store", signal: controller.signal });
       const session = (await response.json()) as DemoSession;
       setData(session?.user ? session : null);
       setStatus(session?.user ? "authenticated" : "unauthenticated");
     } catch {
       setData(null);
       setStatus("unauthenticated");
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   }
 
