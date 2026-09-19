@@ -17,7 +17,7 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = normalizeCallbackUrl(params.get("callbackUrl"));
   const [error, setError] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -53,4 +53,16 @@ function LoginForm() {
       </form>
     </div>
   );
+}
+
+function normalizeCallbackUrl(value: string | null) {
+  if (!value) return "/dashboard";
+
+  try {
+    const parsed = new URL(value, window.location.origin);
+    if (parsed.origin !== window.location.origin) return "/dashboard";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/dashboard";
+  }
 }
