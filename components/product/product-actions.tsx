@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Lock, ShoppingBag, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
@@ -12,6 +13,8 @@ import type { Product } from "@/types";
 export function ProductActions({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const [mounted, setMounted] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const router = useRouter();
   const add = useCartStore((state) => state.add);
   const wishlist = useWishlistStore((state) => state);
   const pushRecent = useRecentStore((state) => state.push);
@@ -53,14 +56,16 @@ export function ProductActions({ product }: { product: Product }) {
       <button
         type="button"
         onClick={() => {
+          setBuying(true);
           add(product, quantity);
           pushRecent(product.id);
-          window.location.assign("/checkout");
+          router.push("/checkout");
         }}
-        className="ink-button mt-2 w-full"
+        className="ink-button mt-2 w-full disabled:cursor-wait disabled:opacity-70"
+        disabled={buying}
       >
         <Zap className="h-4 w-4" />
-        Buy now
+        {buying ? "Opening checkout..." : "Buy now"}
       </button>
       <button type="button" onClick={() => wishlist.toggle(product.id)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-[#d5d9d9] bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50">
         <Heart className={isWishlisted ? "h-4 w-4 fill-saffron" : "h-4 w-4"} />
