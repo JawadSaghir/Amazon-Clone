@@ -4,17 +4,23 @@ import { ChevronDown, Grid2X2, MapPin, Menu, Search, ShoppingCart } from "lucide
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
 import { categories } from "@/lib/catalog";
 
 export function SiteHeader() {
-  const cartCount = useCartStore((state) => state.count());
+  const [mounted, setMounted] = useState(false);
+  const storedCartCount = useCartStore((state) => state.count());
+  const cartCount = mounted ? storedCartCount : 0;
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function onSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

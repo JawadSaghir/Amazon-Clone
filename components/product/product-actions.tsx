@@ -1,8 +1,7 @@
 "use client";
 
 import { Heart, Lock, ShoppingBag, Zap } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
 import { useRecentStore } from "@/components/providers/recent-store";
@@ -12,10 +11,15 @@ import type { Product } from "@/types";
 
 export function ProductActions({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
-  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const add = useCartStore((state) => state.add);
   const wishlist = useWishlistStore((state) => state);
   const pushRecent = useRecentStore((state) => state.push);
+  const isWishlisted = mounted && wishlist.has(product.id);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <aside className="rounded-lg border border-[#d5d9d9] bg-white p-4 shadow-panel">
@@ -51,7 +55,7 @@ export function ProductActions({ product }: { product: Product }) {
         onClick={() => {
           add(product, quantity);
           pushRecent(product.id);
-          router.push("/checkout");
+          window.location.assign("/checkout");
         }}
         className="ink-button mt-2 w-full"
       >
@@ -59,7 +63,7 @@ export function ProductActions({ product }: { product: Product }) {
         Buy now
       </button>
       <button type="button" onClick={() => wishlist.toggle(product.id)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-[#d5d9d9] bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50">
-        <Heart className={wishlist.has(product.id) ? "h-4 w-4 fill-saffron" : "h-4 w-4"} />
+        <Heart className={isWishlisted ? "h-4 w-4 fill-saffron" : "h-4 w-4"} />
         Save to wishlist
       </button>
       <p className="mt-4 flex gap-2 text-xs leading-relaxed text-coal/60">

@@ -3,6 +3,7 @@
 import { BarChart3, Heart, ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
 import { useCompareStore } from "@/components/providers/compare-store";
@@ -11,10 +12,16 @@ import { discountPercent, formatMoney } from "@/lib/utils";
 import type { Product } from "@/types";
 
 export function ProductCard({ product }: { product: Product }) {
+  const [mounted, setMounted] = useState(false);
   const add = useCartStore((state) => state.add);
   const wishlist = useWishlistStore((state) => state);
   const compare = useCompareStore((state) => state);
   const discount = discountPercent(product.priceInr, product.mrpInr);
+  const isWishlisted = mounted && wishlist.has(product.id);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <article className="panel grid overflow-hidden p-3 transition hover:shadow-md">
@@ -48,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
             Add
           </button>
           <button type="button" onClick={() => wishlist.toggle(product.id)} className="border border-coal/15 p-2" aria-label="Toggle wishlist">
-            <Heart className={wishlist.has(product.id) ? "h-4 w-4 fill-pomegranate text-pomegranate" : "h-4 w-4"} />
+            <Heart className={isWishlisted ? "h-4 w-4 fill-pomegranate text-pomegranate" : "h-4 w-4"} />
           </button>
           <button type="button" onClick={() => compare.toggle(product.id)} className="border border-coal/15 p-2" aria-label="Toggle compare">
             <BarChart3 className="h-4 w-4" />

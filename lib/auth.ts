@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { getAuthSecret } from "@/lib/auth-secret";
+
 const demoUsers = [
   {
     id: "demo-customer",
@@ -20,6 +22,7 @@ const demoUsers = [
 ];
 
 export const authOptions: NextAuthOptions = {
+  secret: getAuthSecret(),
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
