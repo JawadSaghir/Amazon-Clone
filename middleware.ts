@@ -1,17 +1,10 @@
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAuthSecret } from "@/lib/auth-secret";
-
-export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request, secret: getAuthSecret() });
+export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const hasSessionCookie = request.cookies.has("next-auth.session-token") || request.cookies.has("__Secure-next-auth.session-token");
 
-  if (path.startsWith("/admin") && token?.role !== "ADMIN") {
-    return redirectToLogin(request);
-  }
-
-  if (path.startsWith("/dashboard") && !token) {
+  if ((path.startsWith("/dashboard") || path.startsWith("/admin")) && !hasSessionCookie) {
     return redirectToLogin(request);
   }
 

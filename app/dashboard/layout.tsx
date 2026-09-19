@@ -1,4 +1,8 @@
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/lib/auth";
 
 const links = [
   ["Overview", "/dashboard"],
@@ -11,7 +15,13 @@ const links = [
   ["Security", "/dashboard/security"]
 ];
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login?callbackUrl=/dashboard");
+  }
+
   return (
     <div className="page-shell grid gap-6 py-8 lg:grid-cols-[230px_1fr]">
       <aside className="panel h-fit p-4">

@@ -1,4 +1,8 @@
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/lib/auth";
 
 const links = [
   ["Overview", "/admin"],
@@ -7,7 +11,13 @@ const links = [
   ["Users", "/admin/users"]
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user.role !== "ADMIN") {
+    redirect("/login?callbackUrl=/admin");
+  }
+
   return (
     <div className="page-shell grid gap-6 py-8 lg:grid-cols-[230px_1fr]">
       <aside className="panel h-fit bg-coal p-4 text-paper">
