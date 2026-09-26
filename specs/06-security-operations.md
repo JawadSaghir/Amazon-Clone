@@ -11,6 +11,7 @@
 - Customer dashboard requires a session.
 - Admin APIs require `role === "ADMIN"`.
 - Server handlers never trust client totals.
+- Customer order reads are scoped to the signed-in user's email/session.
 
 ## Validation
 
@@ -27,13 +28,13 @@ Required local values:
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_APP_URL`
 
 ## Operations
 
 - Run `npm run prisma:generate`.
+- Run `npm run db:seed-dummyjson` when the product database is empty.
 - Run `npm run typecheck`.
 - Run `npm run build`.
-- Use Stripe test mode during local development.
+- Run the local app on `3001` when `.env.local` points `NEXTAUTH_URL` to `http://localhost:3001`.
+- Browser extensions may inject attributes before hydration; the root layout strips known extension attributes and selected controls suppress extension-only hydration noise.

@@ -14,6 +14,8 @@ Returns:
 - `products`
 - `count`
 
+Products are read from MongoDB. If the database is empty, callers receive an empty list and the storefront displays seed instructions.
+
 ## `GET /api/products/[slug]`
 
 Returns one product or `404`.
@@ -30,7 +32,27 @@ Rules:
 
 - Requires a customer session for a real order.
 - Recalculates every price server-side.
-- Returns order totals and a checkout URL placeholder if Stripe keys are not configured.
+- Rejects stale or unknown product IDs.
+- Saves an `Order` plus `OrderItem` snapshots.
+
+Returns:
+
+- `orderId`
+- `totals`
+- `settlementCurrency: "PKR"`
+- `checkoutUrl: "/checkout/success"`
+
+## `GET /api/orders`
+
+Query params:
+
+- `orderId` optional
+
+Rules:
+
+- Requires an authenticated session.
+- Returns only orders belonging to the signed-in customer.
+- Supports the success page and customer order history.
 
 ## `POST /api/reviews`
 

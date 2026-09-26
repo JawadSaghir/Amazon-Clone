@@ -1,12 +1,13 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { useCartStore } from "@/components/providers/cart-store";
 import { useDemoSession } from "@/components/providers/session-store";
-import { calculateTotals } from "@/lib/checkout";
+import { calculateSnapshotTotals } from "@/lib/checkout";
 import { formatMoney } from "@/lib/utils";
 
 export default function CheckoutPage() {
@@ -16,7 +17,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("8XWELCOME");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const totals = calculateTotals(items.map((item) => ({ productId: item.product.id, quantity: item.quantity })), couponCode);
+  const totals = calculateSnapshotTotals(items.map((item) => ({ priceInr: item.product.priceInr, quantity: item.quantity })), couponCode);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +61,7 @@ export default function CheckoutPage() {
     return (
       <div className="page-shell py-16 text-center">
         <div className="panel mx-auto max-w-xl p-10">
-          <h1 className="text-3xl font-black">Loading checkout...</h1>
+          <h1 className="font-display text-3xl font-semibold">Loading checkout...</h1>
         </div>
       </div>
     );
@@ -70,7 +71,7 @@ export default function CheckoutPage() {
     return (
       <div className="page-shell py-16 text-center">
         <div className="panel mx-auto max-w-xl p-10">
-          <h1 className="text-3xl font-black">Sign in to checkout</h1>
+          <h1 className="font-display text-3xl font-semibold">Sign in to checkout</h1>
           <Link href="/login?callbackUrl=/checkout" className="brass-button mt-6">
             Sign in
           </Link>
@@ -83,8 +84,8 @@ export default function CheckoutPage() {
     return (
       <div className="page-shell py-16 text-center">
         <div className="panel mx-auto max-w-xl p-10">
-          <h1 className="text-3xl font-black">Your cart is empty</h1>
-          <p className="mt-3 text-coal/65">Add an item before creating a test order.</p>
+          <h1 className="font-display text-3xl font-semibold">Your cart is empty</h1>
+          <p className="mt-3 text-muted">Add an item before creating a test order.</p>
           <Link href="/search" className="brass-button mt-6">
             Continue shopping
           </Link>
@@ -94,51 +95,65 @@ export default function CheckoutPage() {
   }
 
   return (
-    <form onSubmit={submit} className="page-shell grid gap-5 py-6 lg:grid-cols-[1fr_340px]">
-      <section className="grid gap-4 rounded-sm border border-[#d5d9d9] bg-white p-5">
-        <h1 className="text-3xl font-normal">Checkout</h1>
-        <h2 className="border-b border-[#d5d9d9] pb-2 text-lg font-bold text-pomegranate">1. Delivery address</h2>
-        <input name="fullName" required defaultValue="Demo Customer" placeholder="Full name" className="rounded border border-[#d5d9d9] bg-white p-3" />
-        <input name="phone" required defaultValue="03001234567" placeholder="Phone" className="rounded border border-[#d5d9d9] bg-white p-3" />
-        <input name="line1" required defaultValue="12 Market Road" placeholder="Address line" className="rounded border border-[#d5d9d9] bg-white p-3" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <input name="city" required defaultValue="Lahore" placeholder="City" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <input name="region" required defaultValue="Punjab" placeholder="State / Province" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <input name="postalCode" required defaultValue="54000" placeholder="Postal code" className="rounded border border-[#d5d9d9] bg-white p-3" />
-          <select name="country" defaultValue="Pakistan" className="rounded border border-[#d5d9d9] bg-white p-3">
-            <option>India</option>
-            <option>Pakistan</option>
-          </select>
-        </div>
-      </section>
-      <aside className="h-fit rounded-sm border border-[#d5d9d9] bg-white p-5">
-        <h2 className="text-xl font-bold">Order Summary</h2>
-        <label className="mt-4 block text-sm font-bold">
-          Coupon
-          <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} className="mt-1 w-full rounded border border-[#d5d9d9] bg-white p-2" />
-        </label>
-        <Summary label="Subtotal" value={totals.subtotalInr} />
-        <Summary label="Discount" value={-totals.discountInr} />
-        <Summary label="Shipping" value={totals.shippingInr} />
-        <Summary label="Tax" value={totals.taxInr} />
-        <div className="mt-4 border-t border-coal/10 pt-4">
-          <p className="text-sm font-bold text-coal/60">Order total</p>
-          <p className="text-xl font-bold text-pomegranate">{formatMoney(totals.totalInr)}</p>
-        </div>
-        <button type="submit" className="brass-button mt-5 w-full disabled:cursor-wait disabled:opacity-70" disabled={items.length === 0 || submitting}>
-          {submitting ? "Creating order..." : "Create test order"}
-        </button>
-        {message && <p className="mt-4 text-sm font-bold text-basil">{message}</p>}
-      </aside>
-    </form>
+    <div className="page-shell px-4 py-8 sm:px-8">
+      <div className="mb-6 flex items-center justify-center gap-3 text-sm font-semibold text-muted">
+        <Lock className="h-4 w-4" />
+        Secure checkout
+      </div>
+      <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <section className="card grid gap-4 p-6">
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Checkout</h1>
+          <h2 className="border-b border-line pb-3 text-lg font-semibold text-coal">1. Delivery address</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <input suppressHydrationWarning name="fullName" required defaultValue="Demo Customer" placeholder="Full name" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange sm:col-span-2" />
+            <input suppressHydrationWarning name="phone" required defaultValue="03001234567" placeholder="Phone" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange sm:col-span-2" />
+            <input suppressHydrationWarning name="line1" required defaultValue="12 Market Road" placeholder="Address line" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange sm:col-span-2" />
+            <input suppressHydrationWarning name="city" required defaultValue="Lahore" placeholder="City" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange" />
+            <input suppressHydrationWarning name="region" required defaultValue="Punjab" placeholder="State / Province" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange" />
+            <input suppressHydrationWarning name="postalCode" required defaultValue="54000" placeholder="Postal code" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange" />
+            <select suppressHydrationWarning name="country" defaultValue="Pakistan" className="rounded-xl border border-line bg-paper p-3 text-sm outline-none focus:border-amazonOrange">
+              <option>India</option>
+              <option>Pakistan</option>
+            </select>
+          </div>
+        </section>
+        <aside className="card h-fit p-6">
+          <h2 className="font-display text-xl font-semibold">Order summary</h2>
+          <label className="mt-4 block text-sm font-semibold text-inkSoft">
+            Coupon
+            <input
+              suppressHydrationWarning
+              value={couponCode}
+              onChange={(event) => setCouponCode(event.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-line bg-paper p-2.5 text-sm outline-none focus:border-amazonOrange"
+            />
+          </label>
+          <Summary label="Subtotal" value={totals.subtotalInr} />
+          <Summary label="Discount" value={-totals.discountInr} />
+          <Summary label="Shipping" value={totals.shippingInr} />
+          <Summary label="Tax" value={totals.taxInr} />
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="text-sm font-semibold text-muted">Order total</p>
+            <p className="font-display text-2xl font-semibold text-coal">{formatMoney(totals.totalInr)}</p>
+          </div>
+          <button suppressHydrationWarning type="submit" className="brass-button mt-5 w-full disabled:cursor-wait disabled:opacity-70" disabled={items.length === 0 || submitting}>
+            {submitting ? "Creating order..." : "Place order"}
+          </button>
+          {message && <p className="mt-4 text-sm font-semibold text-basil">{message}</p>}
+          <p className="mt-4 text-center text-[11px] leading-relaxed text-muted">
+            By placing your order you agree to 8x Bazaar&rsquo;s Conditions of Use and Privacy Notice.
+          </p>
+        </aside>
+      </form>
+    </div>
   );
 }
 
 function Summary({ label, value }: { label: string; value: number }) {
   return (
     <div className="mt-3 flex justify-between gap-4 text-sm">
-      <span className="font-bold text-coal/60">{label}</span>
-      <span className="text-right font-black">{formatMoney(value)}</span>
+      <span className="font-semibold text-muted">{label}</span>
+      <span className="text-right font-semibold text-coal">{formatMoney(value)}</span>
     </div>
   );
 }

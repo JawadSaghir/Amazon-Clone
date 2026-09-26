@@ -50,12 +50,12 @@ function LoginForm() {
   if (status === "authenticated") {
     return (
       <div className="page-shell py-16">
-        <div className="panel mx-auto grid max-w-md gap-4 p-6">
-          <Link href="/" className="text-3xl font-black">
-            8x<span className="text-saffron">market</span>
+        <div className="panel mx-auto grid max-w-md gap-4 p-8">
+          <Link href="/" className="font-display text-3xl font-semibold text-coal">
+            8x<span className="text-amazonOrange">bazaar</span>
           </Link>
-          <h1 className="text-2xl font-black">You are signed in</h1>
-          <p className="text-sm text-coal/60">Redirecting to your account...</p>
+          <h1 className="font-display text-2xl font-semibold">You are signed in</h1>
+          <p className="text-sm text-muted">Redirecting to your account...</p>
           <Link href={callbackUrl} className="brass-button">
             Continue
           </Link>
@@ -66,18 +66,43 @@ function LoginForm() {
 
   return (
     <div className="page-shell py-16">
-      <form onSubmit={submit} className="panel mx-auto grid max-w-md gap-4 p-6">
-        <Link href="/" className="text-3xl font-black">
-          8x<span className="text-saffron">market</span>
+      <form onSubmit={submit} autoComplete="off" className="panel mx-auto grid max-w-md gap-4 p-8 transition duration-200 hover:shadow-panel">
+        <Link href="/" className="font-display text-3xl font-semibold text-coal">
+          8x<span className="text-amazonOrange">bazaar</span>
         </Link>
-        <h1 className="text-2xl font-black">Sign in</h1>
-        <input name="email" type="email" defaultValue="customer@8x.test" className="border border-coal/15 bg-white p-3" />
-        <input name="password" type="password" defaultValue="8xDemo!Market2026" className="border border-coal/15 bg-white p-3" />
-        <button className="brass-button disabled:cursor-wait disabled:opacity-70" type="submit" disabled={submitting || status === "loading"}>
+        <h1 className="font-display text-2xl font-semibold">Sign in</h1>
+        <label className="grid gap-1.5 text-sm">
+          <span className="font-semibold text-inkSoft">Email address</span>
+          <input
+            suppressHydrationWarning
+            name="email"
+            type="email"
+            autoComplete="off"
+            placeholder="Email address"
+            className="rounded-xl border border-line bg-paper p-3 text-sm outline-none transition duration-200 focus:border-amazonOrange focus:bg-white focus:shadow-sm"
+          />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="font-semibold text-inkSoft">Password</span>
+          <input
+            suppressHydrationWarning
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Password"
+            className="rounded-xl border border-line bg-paper p-3 text-sm outline-none transition duration-200 focus:border-amazonOrange focus:bg-white focus:shadow-sm"
+          />
+        </label>
+        <button suppressHydrationWarning className="brass-button mt-1 transition duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70" type="submit" disabled={submitting || status === "loading"}>
           {submitting ? "Signing in..." : "Sign in"}
         </button>
         {error && <p className="text-sm font-bold text-pomegranate">{error}</p>}
-        <p className="text-sm text-coal/60">Demo admin: admin@8x.test / 8xDemo!Market2026</p>
+        <p className="text-center text-sm text-muted">
+          New to 8x Bazaar?{" "}
+          <Link href="/signup" className="font-semibold text-amazonOrangeDark hover:underline">
+            Create an account
+          </Link>
+        </p>
       </form>
     </div>
   );

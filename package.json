@@ -2,13 +2,15 @@
   "name": "8x-marketplace",
   "version": "1.0.0",
   "private": true,
-  "description": "8x Marketplace full-stack ecommerce application with INR and PKR pricing.",
+  "description": "8x Marketplace full-stack ecommerce demo with MongoDB products, PKR pricing, and saved demo orders.",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "db:sync-high-end-image": "node scripts/sync-high-end-product-image.js",
+    "db:seed-dummyjson": "node scripts/seed-dummyjson-products.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -16,6 +18,7 @@
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
+    "mongodb": "^7.6.0",
     "next": "^15.5.6",
     "next-auth": "^4.24.11",
     "react": "^19.1.0",

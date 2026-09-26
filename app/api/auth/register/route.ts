@@ -1,6 +1,6 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
+import { createAuthUser } from "@/lib/auth-users";
 import { registerSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
@@ -9,15 +9,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid registration payload." }, { status: 400 });
   }
 
-  const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+  const { user, error } = await createAuthUser(parsed.data);
+  if (!user) {
+    return NextResponse.json({ message: error }, { status: 409 });
+  }
 
   return NextResponse.json({
     user: {
-      id: `user-${Date.now()}`,
-      name: parsed.data.name,
-      email: parsed.data.email.toLowerCase(),
-      role: "CUSTOMER",
-      passwordHash
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
     }
   });
 }

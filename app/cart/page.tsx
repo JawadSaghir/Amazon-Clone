@@ -1,23 +1,22 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 import { useCartStore } from "@/components/providers/cart-store";
-import { calculateTotals } from "@/lib/checkout";
+import { calculateSnapshotTotals } from "@/lib/checkout";
 import { formatMoney } from "@/lib/utils";
 
 export default function CartPage() {
   const { items, remove, setQuantity } = useCartStore();
-  const totals = calculateTotals(items.map((item) => ({ productId: item.product.id, quantity: item.quantity })));
+  const totals = calculateSnapshotTotals(items.map((item) => ({ priceInr: item.product.priceInr, quantity: item.quantity })));
 
   if (items.length === 0) {
     return (
       <div className="page-shell py-16 text-center">
         <div className="panel mx-auto max-w-xl p-10">
-          <h1 className="text-3xl font-black">Your cart is empty</h1>
-          <p className="mt-3 text-coal/60">Start with a deal shelf or search the catalog.</p>
+          <h1 className="font-display text-3xl font-semibold">Your cart is empty</h1>
+          <p className="mt-3 text-muted">Start with a deal shelf or search the catalog.</p>
           <Link href="/search" className="brass-button mt-6">
             Shop now
           </Link>
@@ -27,50 +26,67 @@ export default function CartPage() {
   }
 
   return (
-    <div className="page-shell grid gap-5 py-6 lg:grid-cols-[1fr_320px]">
-      <section className="bg-white p-5">
-        <h1 className="text-3xl font-normal">Shopping Cart</h1>
-        <p className="border-b border-[#d5d9d9] pb-2 text-right text-sm text-coal/60">Price</p>
-        <div className="mt-5 divide-y divide-coal/10">
+    <div className="page-shell grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[1fr_360px]">
+      <section className="card p-6">
+        <h1 className="font-display text-2xl font-semibold sm:text-3xl">Shopping cart</h1>
+        <div className="mt-5 divide-y divide-line">
           {items.map(({ product, quantity }) => (
-            <div key={product.id} className="grid gap-4 py-4 sm:grid-cols-[120px_1fr_auto]">
-              <div className="relative aspect-square overflow-hidden bg-white">
-                <Image src={product.images[0]} alt={product.title} fill sizes="120px" className="object-cover" />
+            <div key={product.id} className="grid gap-4 py-5 sm:grid-cols-[100px_1fr_auto]">
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-paper">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={product.images[0]} alt={product.title} className="h-full w-full object-contain p-2" />
               </div>
               <div>
-                <Link href={`/products/${product.slug}`} className="text-lg hover:text-pomegranate hover:underline">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">{product.brand}</p>
+                <Link href={`/products/${product.slug}`} className="mt-1 block text-base font-medium text-coal hover:text-pomegranate hover:underline">
                   {product.title}
                 </Link>
-                <p className="mt-1 text-sm text-basil">In stock</p>
-                <p className="mt-2 font-bold">{formatMoney(product.priceInr)}</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <select value={quantity} onChange={(event) => setQuantity(product.id, Number(event.target.value))} className="rounded border border-[#d5d9d9] bg-slate-50 px-2 py-1 text-sm shadow-brass">
-                    {Array.from({ length: 10 }).map((_, index) => (
-                      <option key={index + 1}>{index + 1}</option>
-                    ))}
-                  </select>
-                  <button type="button" onClick={() => remove(product.id)} className="flex items-center gap-1 text-sm font-bold text-pomegranate">
+                <p className="mt-1 text-sm font-semibold text-basil">In stock</p>
+                <div className="mt-3 flex flex-wrap items-center gap-4">
+                  <div className="flex items-center overflow-hidden rounded-full border border-line">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(product.id, Math.max(1, quantity - 1))}
+                      className="flex h-8 w-8 items-center justify-center text-coal/70 hover:bg-paper"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(product.id, quantity + 1)}
+                      className="flex h-8 w-8 items-center justify-center text-coal/70 hover:bg-paper"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <button type="button" onClick={() => remove(product.id)} className="flex items-center gap-1.5 text-sm font-semibold text-pomegranate">
                     <Trash2 className="h-4 w-4" />
                     Remove
                   </button>
                 </div>
               </div>
-              <p className="font-black">{formatMoney(product.priceInr * quantity)}</p>
+              <p className="font-display text-lg font-semibold sm:text-right">{formatMoney(product.priceInr * quantity)}</p>
             </div>
           ))}
         </div>
+        <Link href="/search" className="link-ink mt-4 inline-block text-sm">
+          &larr; Continue shopping
+        </Link>
       </section>
-      <aside className="h-fit rounded-sm border border-[#d5d9d9] bg-white p-5">
-        <h2 className="text-xl font-bold">Subtotal ({items.length} items)</h2>
+      <aside className="card h-fit p-6">
+        <h2 className="font-display text-xl font-semibold">Order summary ({items.length} items)</h2>
         <SummaryRow label="Subtotal" value={totals.subtotalInr} />
         <SummaryRow label="Shipping" value={totals.shippingInr} />
         <SummaryRow label="Tax" value={totals.taxInr} />
-        <div className="mt-4 border-t border-coal/10 pt-4">
-          <p className="text-sm font-bold text-coal/60">Order total</p>
-          <p className="text-xl font-bold">{formatMoney(totals.totalInr)}</p>
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="text-sm font-semibold text-muted">Order total</p>
+          <p className="font-display text-2xl font-semibold">{formatMoney(totals.totalInr)}</p>
         </div>
         <Link href="/checkout" className="brass-button mt-5 w-full">
-          Checkout
+          Proceed to checkout
         </Link>
       </aside>
     </div>
@@ -80,8 +96,8 @@ export default function CartPage() {
 function SummaryRow({ label, value }: { label: string; value: number }) {
   return (
     <div className="mt-4 flex items-start justify-between gap-4 text-sm">
-      <span className="font-bold text-coal/60">{label}</span>
-      <span className="text-right font-black">{value === 0 ? "FREE" : formatMoney(value)}</span>
+      <span className="font-semibold text-muted">{label}</span>
+      <span className="text-right font-semibold text-coal">{value === 0 ? "FREE" : formatMoney(value)}</span>
     </div>
   );
 }

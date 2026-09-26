@@ -1,171 +1,315 @@
+import type { Product as DbProduct } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+
+import dummyProducts from "@/data/dummyjson-products.json";
+import { categories } from "@/lib/category-labels";
+import { prisma } from "@/lib/prisma";
 import type { Product } from "@/types";
 
-export const categories = [
-  "Mobiles",
-  "Computing",
-  "Fashion",
-  "Home",
-  "Kitchen",
-  "Beauty",
-  "Grocery",
-  "Gaming",
-  "Sports"
-];
+export { categories };
 
-export const catalog: Product[] = [
-  {
-    id: "p-100",
-    slug: "orion-x1-5g-phone",
-    title: "Orion X1 5G Phone with 120Hz AMOLED Display",
-    brand: "Orion",
-    category: "Mobiles",
-    description: "A fast 5G handset with a crisp AMOLED panel, all-day battery, dual speakers, and a camera system tuned for low-light city shots.",
-    images: ["https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=900&q=80"],
-    tags: ["phone", "5g", "amoled"],
-    priceInr: 24999,
-    mrpInr: 31999,
-    stock: 42,
-    rating: 4.5,
-    reviewCount: 1832,
-    seller: "8x Fulfilment",
-    isDeal: true,
-    isFeatured: true
-  },
-  {
-    id: "p-101",
-    slug: "nimblebook-air-14",
-    title: "NimbleBook Air 14 Ultralight Laptop",
-    brand: "Nimble",
-    category: "Computing",
-    description: "A 14-inch productivity laptop with quiet thermals, long battery life, and a color-accurate display for students and founders.",
-    images: ["https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80"],
-    tags: ["laptop", "work", "student"],
-    priceInr: 64990,
-    mrpInr: 79990,
-    stock: 18,
-    rating: 4.4,
-    reviewCount: 764,
-    seller: "8x Direct",
-    isDeal: false,
-    isFeatured: true
-  },
-  {
-    id: "p-102",
-    slug: "saffron-stitch-cotton-kurta",
-    title: "Saffron Stitch Cotton Kurta Set",
-    brand: "Saffron Stitch",
-    category: "Fashion",
-    description: "Breathable cotton festive wear with tailored sleeves, hand-block details, and a relaxed fit for daily comfort.",
-    images: ["https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=900&q=80"],
-    tags: ["kurta", "cotton", "festive"],
-    priceInr: 1899,
-    mrpInr: 3299,
-    stock: 96,
-    rating: 4.2,
-    reviewCount: 441,
-    seller: "Textile House",
-    isDeal: true,
-    isFeatured: false
-  },
-  {
-    id: "p-103",
-    slug: "copperline-pressure-cooker-5l",
-    title: "Copperline 5L Stainless Pressure Cooker",
-    brand: "Copperline",
-    category: "Kitchen",
-    description: "A sturdy 5L cooker with induction base, easy-grip handles, and a safety valve made for busy family kitchens.",
-    images: ["https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=80"],
-    tags: ["kitchen", "cooker", "steel"],
-    priceInr: 2490,
-    mrpInr: 3990,
-    stock: 63,
-    rating: 4.6,
-    reviewCount: 1004,
-    seller: "Kitchen Square",
-    isDeal: true,
-    isFeatured: true
-  },
-  {
-    id: "p-104",
-    slug: "velvet-bean-arabica-coffee",
-    title: "Velvet Bean Arabica Coffee 500g",
-    brand: "Velvet Bean",
-    category: "Grocery",
-    description: "Medium-roast Arabica beans with cocoa notes and a clean finish, roasted weekly for filter and espresso brewing.",
-    images: ["https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=900&q=80"],
-    tags: ["coffee", "grocery", "arabica"],
-    priceInr: 699,
-    mrpInr: 999,
-    stock: 120,
-    rating: 4.7,
-    reviewCount: 2388,
-    seller: "Roast Lane",
-    isDeal: false,
-    isFeatured: true
-  },
-  {
-    id: "p-105",
-    slug: "aurora-anc-headphones",
-    title: "Aurora ANC Wireless Headphones",
-    brand: "Aurora",
-    category: "Computing",
-    description: "Over-ear wireless headphones with hybrid noise cancellation, soft cushions, low-latency mode, and 40-hour battery life.",
-    images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80"],
-    tags: ["audio", "headphones", "anc"],
-    priceInr: 8990,
-    mrpInr: 12990,
-    stock: 34,
-    rating: 4.3,
-    reviewCount: 891,
-    seller: "Sound Yard",
-    isDeal: true,
-    isFeatured: false
-  },
-  {
-    id: "p-106",
-    slug: "terra-firm-yoga-mat",
-    title: "Terra Firm Anti-Slip Yoga Mat",
-    brand: "Terra Firm",
-    category: "Sports",
-    description: "A dense anti-slip mat for yoga, mobility, and home workouts with alignment marks and a carry strap.",
-    images: ["https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=900&q=80"],
-    tags: ["fitness", "yoga", "sports"],
-    priceInr: 1199,
-    mrpInr: 1999,
-    stock: 72,
-    rating: 4.1,
-    reviewCount: 312,
-    seller: "Move Studio",
-    isDeal: false,
-    isFeatured: false
-  },
-  {
-    id: "p-107",
-    slug: "lumen-skin-dew-serum",
-    title: "Lumen Skin Dew Vitamin C Serum",
-    brand: "Lumen",
-    category: "Beauty",
-    description: "A lightweight vitamin C serum with niacinamide and hyaluronic acid for everyday glow support.",
-    images: ["https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=80"],
-    tags: ["beauty", "serum", "skincare"],
-    priceInr: 849,
-    mrpInr: 1499,
-    stock: 88,
-    rating: 4.0,
-    reviewCount: 544,
-    seller: "Glow Counter",
-    isDeal: true,
-    isFeatured: false
+const DEFAULT_PRODUCT_LIMIT = 24;
+const MAX_PRODUCT_LIMIT = 60;
+const DATABASE_FALLBACK_TIMEOUT_MS = 1200;
+let databaseUnavailable = false;
+let databaseWarningShown = false;
+
+type DummyJsonProduct = {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  price: number;
+  discountPercentage?: number;
+  rating: number;
+  stock: number;
+  tags?: string[];
+  brand?: string;
+  reviews?: unknown[];
+  images?: string[];
+  thumbnail?: string;
+};
+
+const categoryMap: Record<string, string> = {
+  beauty: "Beauty",
+  "skin-care": "Beauty",
+  fragrances: "Fragrances",
+  furniture: "Furniture",
+  groceries: "Groceries",
+  "home-decoration": "Home Decoration",
+  "kitchen-accessories": "Kitchen Accessories",
+  laptops: "Laptops",
+  "mens-shirts": "Mens Shoes",
+  "mens-shoes": "Mens Shoes",
+  "mens-watches": "Mens Shoes",
+  sunglasses: "Mens Shoes",
+  smartphones: "Smartphones",
+  "mobile-accessories": "Smartphones",
+  tablets: "Smartphones",
+  "sports-accessories": "Sports Accessories",
+  motorcycle: "Sports Accessories",
+  vehicle: "Sports Accessories",
+  tops: "Womens Dresses",
+  "womens-bags": "Womens Dresses",
+  "womens-dresses": "Womens Dresses",
+  "womens-jewellery": "Womens Dresses",
+  "womens-shoes": "Womens Dresses",
+  "womens-watches": "Womens Dresses"
+};
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function titleCaseCategory(value: string) {
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function convertPrice(priceUsd: number) {
+  return Math.max(499, Math.round(priceUsd * 335));
+}
+
+function calculateMrp(price: number, discount = 0) {
+  if (discount <= 0 || discount >= 90) return Math.round(price * 1.15);
+  return Math.max(price + 1, Math.round(price / (1 - discount / 100)));
+}
+
+const FALLBACK_PRODUCTS: Product[] = (dummyProducts as DummyJsonProduct[])
+  .map((product) => {
+    const category = categoryMap[product.category] ?? titleCaseCategory(product.category);
+    const priceInr = convertPrice(product.price);
+    const images = product.images?.length ? product.images : product.thumbnail ? [product.thumbnail] : [];
+
+    return {
+      id: `dummy-${product.id}`,
+      slug: `${slugify(product.title)}-${product.id}`,
+      title: product.title,
+      brand: product.brand?.trim() || titleCaseCategory(product.category),
+      category,
+      description: product.description,
+      images,
+      tags: product.tags?.length ? product.tags : [product.category],
+      priceInr,
+      mrpInr: calculateMrp(priceInr, product.discountPercentage),
+      stock: product.stock,
+      rating: Number(product.rating.toFixed(1)),
+      reviewCount: Math.max(product.reviews?.length ?? 0, Math.round(product.rating * 100)),
+      seller: "8x Bazaar Database",
+      isDeal: (product.discountPercentage ?? 0) >= 10,
+      isFeatured: product.rating >= 4.5 || product.id <= 12
+    };
+  })
+  .filter((product) => categories.includes(product.category) && product.images.length > 0);
+
+type ProductSort = "featured" | "price-asc" | "price-desc" | "rating" | "newest" | "popular";
+
+type ProductQueryParams = {
+  q?: string;
+  category?: string;
+  deal?: string | boolean;
+  sort?: string;
+  limit?: number;
+  excludeId?: string;
+};
+
+function hasDatabaseUrl() {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+function isDatabaseConnectionError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("Server selection timeout") || message.includes("No available servers") || message.includes("ECONNREFUSED");
+}
+
+function warnDatabaseFallback(error: unknown) {
+  if (isDatabaseConnectionError(error)) {
+    databaseUnavailable = true;
+    if (!databaseWarningShown) {
+      console.warn("Database is unavailable; using bundled demo products.");
+      databaseWarningShown = true;
+    }
+    return;
   }
-];
 
-export function getProducts(params?: { q?: string; category?: string; deal?: string; sort?: string }) {
+  throw error;
+}
+
+async function withDatabaseFallback<T>(query: () => Promise<T>, fallback: () => T): Promise<T> {
+  if (!hasDatabaseUrl() || databaseUnavailable) return fallback();
+
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const queryPromise = query().catch((error) => {
+    warnDatabaseFallback(error);
+    return fallback();
+  });
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timeout = setTimeout(() => {
+      databaseUnavailable = true;
+      if (!databaseWarningShown) {
+        console.warn("Database did not respond quickly; using bundled demo products.");
+        databaseWarningShown = true;
+      }
+      resolve(fallback());
+    }, DATABASE_FALLBACK_TIMEOUT_MS);
+  });
+
+  const result = await Promise.race([queryPromise, timeoutPromise]);
+  if (timeout) clearTimeout(timeout);
+  return result;
+}
+
+function isMongoObjectId(id: string) {
+  return /^[a-f\d]{24}$/i.test(id);
+}
+
+function toProduct(product: DbProduct): Product {
+  return {
+    id: product.id,
+    slug: product.slug,
+    title: product.title,
+    brand: product.brand,
+    category: product.category,
+    description: product.description,
+    images: product.images,
+    tags: product.tags,
+    priceInr: product.priceInr,
+    mrpInr: product.mrpInr,
+    stock: product.stock,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
+    seller: product.seller,
+    isDeal: product.isDeal,
+    isFeatured: product.isFeatured
+  };
+}
+
+async function readProductsFromDatabase() {
+  return withDatabaseFallback(async () => {
+    const products = await prisma.product.findMany({ orderBy: { createdAt: "asc" } });
+    return products.map(toProduct);
+  }, () => FALLBACK_PRODUCTS);
+}
+
+function clampLimit(limit?: number) {
+  if (!Number.isFinite(limit)) return DEFAULT_PRODUCT_LIMIT;
+  return Math.max(1, Math.min(MAX_PRODUCT_LIMIT, Math.trunc(limit ?? DEFAULT_PRODUCT_LIMIT)));
+}
+
+function parseSort(sort?: string): ProductSort {
+  if (sort === "price-asc" || sort === "price-desc" || sort === "rating" || sort === "newest" || sort === "popular") {
+    return sort;
+  }
+  return "featured";
+}
+
+function orderByForSort(sort: ProductSort): Prisma.ProductOrderByWithRelationInput[] {
+  if (sort === "price-asc") return [{ priceInr: "asc" }, { id: "asc" }];
+  if (sort === "price-desc") return [{ priceInr: "desc" }, { id: "asc" }];
+  if (sort === "rating") return [{ rating: "desc" }, { reviewCount: "desc" }, { id: "asc" }];
+  if (sort === "newest") return [{ createdAt: "desc" }, { id: "asc" }];
+  if (sort === "popular") return [{ reviewCount: "desc" }, { rating: "desc" }, { id: "asc" }];
+  return [{ isFeatured: "desc" }, { reviewCount: "desc" }, { id: "asc" }];
+}
+
+function buildWhere(params?: ProductQueryParams): Prisma.ProductWhereInput {
+  const q = params?.q?.trim();
+  const category = params?.category;
+  const deal = params?.deal === true || params?.deal === "true" || params?.deal === "flash";
+  const where: Prisma.ProductWhereInput = {};
+
+  if (category) where.category = category;
+  if (deal) where.isDeal = true;
+  if (params?.excludeId && isMongoObjectId(params.excludeId)) {
+    where.id = { not: params.excludeId };
+  }
+  if (q) {
+    const normalizedQuery = q.toLowerCase();
+    where.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { brand: { contains: q, mode: "insensitive" } },
+      { category: { contains: q, mode: "insensitive" } },
+      { tags: { has: q } },
+      { tags: { has: normalizedQuery } }
+    ];
+  }
+
+  return where;
+}
+
+function filterProducts(products: Product[], params?: ProductQueryParams) {
+  const q = params?.q?.trim().toLowerCase();
+  const category = params?.category;
+  const deal = params?.deal === true || params?.deal === "true" || params?.deal === "flash";
+
+  return products.filter((product) => {
+    const matchesQuery = !q || [product.title, product.brand, product.category, ...product.tags].join(" ").toLowerCase().includes(q);
+    const matchesCategory = !category || product.category === category;
+    const matchesDeal = !deal || product.isDeal;
+    const matchesExcludedProduct = !params?.excludeId || product.id !== params.excludeId;
+    return matchesQuery && matchesCategory && matchesDeal && matchesExcludedProduct;
+  });
+}
+
+function sortProducts(products: Product[], sort: ProductSort) {
+  return [...products].sort((a, b) => {
+    if (sort === "price-asc") return a.priceInr - b.priceInr || a.id.localeCompare(b.id);
+    if (sort === "price-desc") return b.priceInr - a.priceInr || a.id.localeCompare(b.id);
+    if (sort === "rating") return b.rating - a.rating || b.reviewCount - a.reviewCount || a.id.localeCompare(b.id);
+    if (sort === "newest") return b.id.localeCompare(a.id);
+    if (sort === "popular") return b.reviewCount - a.reviewCount || b.rating - a.rating || a.id.localeCompare(b.id);
+    return Number(b.isFeatured) - Number(a.isFeatured) || b.reviewCount - a.reviewCount || a.id.localeCompare(b.id);
+  });
+}
+
+function queryFallbackProducts(params?: ProductQueryParams) {
+  return sortProducts(filterProducts(FALLBACK_PRODUCTS, params), parseSort(params?.sort)).slice(0, clampLimit(params?.limit));
+}
+
+export async function getProducts(params?: ProductQueryParams) {
+  return withDatabaseFallback(async () => {
+    const products = await prisma.product.findMany({
+      where: buildWhere(params),
+      orderBy: orderByForSort(parseSort(params?.sort)),
+      take: clampLimit(params?.limit)
+    });
+
+    return products.map(toProduct);
+  }, () => queryFallbackProducts(params));
+}
+
+export async function getProductResults(params?: ProductQueryParams) {
+  return withDatabaseFallback(async () => {
+    const where = buildWhere(params);
+    const [products, count] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: orderByForSort(parseSort(params?.sort)),
+        take: clampLimit(params?.limit)
+      }),
+      prisma.product.count({ where })
+    ]);
+
+    return { products: products.map(toProduct), count };
+  }, () => {
+    const products = queryFallbackProducts(params);
+    return { products, count: filterProducts(FALLBACK_PRODUCTS, params).length };
+  });
+}
+
+export async function getProductsInMemory(params?: { q?: string; category?: string; deal?: string; sort?: string; limit?: number }) {
   const q = params?.q?.trim().toLowerCase();
   const category = params?.category;
   const deal = params?.deal === "true" || params?.deal === "flash";
   const sort = params?.sort ?? "featured";
 
-  let products = catalog.filter((product) => {
+  let products = (await readProductsFromDatabase()).filter((product) => {
     const matchesQuery = !q || [product.title, product.brand, product.category, ...product.tags].join(" ").toLowerCase().includes(q);
     const matchesCategory = !category || product.category === category;
     const matchesDeal = !deal || product.isDeal;
@@ -176,16 +320,43 @@ export function getProducts(params?: { q?: string; category?: string; deal?: str
     if (sort === "price-asc") return a.priceInr - b.priceInr;
     if (sort === "price-desc") return b.priceInr - a.priceInr;
     if (sort === "rating") return b.rating - a.rating;
-    return Number(b.isFeatured) - Number(a.isFeatured);
+    return Number(b.isFeatured) - Number(a.isFeatured) || b.reviewCount - a.reviewCount;
   });
 
-  return products;
+  return products.slice(0, clampLimit(params?.limit));
 }
 
-export function getProductBySlug(slug: string) {
-  return catalog.find((product) => product.slug === slug);
+export async function getAllProducts() {
+  return readProductsFromDatabase();
 }
 
-export function getProductById(id: string) {
-  return catalog.find((product) => product.id === id);
+export async function getProductBySlug(slug: string) {
+  return withDatabaseFallback(async () => {
+    const product = await prisma.product.findUnique({ where: { slug } });
+    return product ? toProduct(product) : null;
+  }, () => FALLBACK_PRODUCTS.find((product) => product.slug === slug) ?? null);
+}
+
+export async function getProductById(id: string) {
+  const fallbackProduct = FALLBACK_PRODUCTS.find((product) => product.id === id) ?? null;
+  if (!isMongoObjectId(id)) return fallbackProduct;
+  return withDatabaseFallback(async () => {
+    const product = await prisma.product.findUnique({ where: { id } });
+    return product ? toProduct(product) : fallbackProduct;
+  }, () => fallbackProduct);
+}
+
+export async function getProductsByIds(ids: string[]) {
+  if (ids.length === 0) return [];
+  const fallbackProducts = FALLBACK_PRODUCTS.filter((product) => ids.includes(product.id));
+  const validIds = ids.filter(isMongoObjectId);
+  if (validIds.length === 0) return fallbackProducts;
+  return withDatabaseFallback(async () => {
+    const products = await prisma.product.findMany({ where: { id: { in: validIds } } });
+    return [...products.map(toProduct), ...fallbackProducts];
+  }, () => fallbackProducts);
+}
+
+export async function getProductCount() {
+  return withDatabaseFallback(() => prisma.product.count(), () => FALLBACK_PRODUCTS.length);
 }

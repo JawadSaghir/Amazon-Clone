@@ -19,21 +19,30 @@ type CartStore = {
   count: () => number;
 };
 
+function isDatabaseProductId(id: string) {
+  return /^[a-f\d]{24}$/i.test(id);
+}
+
+function keepDatabaseCartItems(items: CartItem[]) {
+  return items.filter((item) => isDatabaseProductId(item.product.id));
+}
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
       add: (product, quantity = 1) =>
         set((state) => {
-          const existing = state.items.find((item) => item.product.id === product.id);
+          const items = keepDatabaseCartItems(state.items);
+          const existing = items.find((item) => item.product.id === product.id);
           if (existing) {
             return {
-              items: state.items.map((item) =>
+              items: items.map((item) =>
                 item.product.id === product.id ? { ...item, quantity: Math.min(10, item.quantity + quantity) } : item
               )
             };
           }
-          return { items: [...state.items, { product, quantity }] };
+          return { items: [...items, { product, quantity }] };
         }),
       remove: (productId) => set((state) => ({ items: state.items.filter((item) => item.product.id !== productId) })),
       setQuantity: (productId, quantity) =>
@@ -43,6 +52,13 @@ export const useCartStore = create<CartStore>()(
       clear: () => set({ items: [] }),
       count: () => get().items.reduce((sum, item) => sum + item.quantity, 0)
     }),
-    { name: "8x-cart" }
+    {
+      name: "8x-cart",
+      version: 2,
+      migrate: (persistedState) => {
+        const state = persistedState as CartStore;
+        return { ...state, items: keepDatabaseCartItems(state.items ?? []) };
+      }
+    }
   )
 );

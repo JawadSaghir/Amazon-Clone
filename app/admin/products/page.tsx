@@ -1,7 +1,9 @@
-import { catalog } from "@/lib/catalog";
+import { getAllProducts } from "@/lib/catalog";
 import { formatMoney } from "@/lib/utils";
 
-export default function AdminProductsPage() {
+export default async function AdminProductsPage() {
+  const products = await getAllProducts();
+
   return (
     <div className="panel overflow-hidden">
       <div className="p-5">
@@ -17,7 +19,7 @@ export default function AdminProductsPage() {
           </tr>
         </thead>
         <tbody>
-          {catalog.map((product) => (
+          {products.map((product) => (
             <tr key={product.id} className="border-t border-coal/10">
               <td className="p-3 font-bold">{product.title}</td>
               <td className="p-3">{product.category}</td>

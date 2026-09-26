@@ -16,25 +16,31 @@ export function ProductActions({ product }: { product: Product }) {
   const [buying, setBuying] = useState(false);
   const router = useRouter();
   const add = useCartStore((state) => state.add);
-  const wishlist = useWishlistStore((state) => state);
+  const toggleWishlist = useWishlistStore((state) => state.toggle);
+  const isWishlistedValue = useWishlistStore((state) => state.ids.includes(product.id));
   const pushRecent = useRecentStore((state) => state.push);
-  const isWishlisted = mounted && wishlist.has(product.id);
+  const isWishlisted = mounted && isWishlistedValue;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   return (
-    <aside className="rounded-lg border border-[#d5d9d9] bg-white p-4 shadow-panel">
-      <p className="text-2xl font-normal">{formatMoney(product.priceInr)}</p>
-      <p className="mt-3 text-sm">
-        <span className="font-bold text-basil">FREE delivery</span> on eligible orders. Fast dispatch across India and Pakistan.
+    <aside className="card h-fit p-5">
+      <p className="font-display text-2xl font-semibold text-coal">{formatMoney(product.priceInr)}</p>
+      <p className="mt-3 text-sm text-inkSoft">
+        <span className="font-semibold text-basil">FREE delivery</span> on eligible orders. Fast dispatch across India and Pakistan.
       </p>
-      <p className="mt-3 text-lg font-medium text-basil">{product.stock > 0 ? "In stock" : "Out of stock"}</p>
-      <p className="mt-1 text-xs text-coal/65">Ships from and sold by {product.seller}</p>
-      <label className="mt-4 block text-sm">
+      <p className="mt-3 text-sm font-semibold text-basil">{product.stock > 0 ? "In stock" : "Out of stock"}</p>
+      <p className="mt-1 text-xs text-muted">Ships from and sold by {product.seller}</p>
+      <label className="mt-4 block text-sm font-medium text-inkSoft">
         Qty:
-        <select value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className="ml-2 rounded border border-[#d5d9d9] bg-slate-50 px-2 py-1 text-sm">
+        <select
+          suppressHydrationWarning
+          value={quantity}
+          onChange={(event) => setQuantity(Number(event.target.value))}
+          className="ml-2 rounded-lg border border-line bg-paper px-2 py-1.5 text-sm outline-none focus:border-amazonOrange"
+        >
           {Array.from({ length: Math.min(10, product.stock) }).map((_, index) => (
             <option key={index + 1} value={index + 1}>
               {index + 1}
@@ -43,6 +49,7 @@ export function ProductActions({ product }: { product: Product }) {
         </select>
       </label>
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => {
           add(product, quantity);
@@ -54,6 +61,7 @@ export function ProductActions({ product }: { product: Product }) {
         Add to cart
       </button>
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => {
           setBuying(true);
@@ -67,13 +75,18 @@ export function ProductActions({ product }: { product: Product }) {
         <Zap className="h-4 w-4" />
         {buying ? "Opening checkout..." : "Buy now"}
       </button>
-      <button type="button" onClick={() => wishlist.toggle(product.id)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-[#d5d9d9] bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50">
-        <Heart className={isWishlisted ? "h-4 w-4 fill-saffron" : "h-4 w-4"} />
+      <button
+        suppressHydrationWarning
+        type="button"
+        onClick={() => toggleWishlist(product.id)}
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-full border border-line bg-white px-4 py-3 text-sm font-semibold text-coal hover:border-coal/40"
+      >
+        <Heart className={isWishlisted ? "h-4 w-4 fill-pomegranate text-pomegranate" : "h-4 w-4"} />
         Save to wishlist
       </button>
-      <p className="mt-4 flex gap-2 text-xs leading-relaxed text-coal/60">
+      <p className="mt-4 flex gap-2 text-xs leading-relaxed text-muted">
         <Lock className="h-4 w-4 shrink-0 text-indigoInk" />
-        Secure test checkout. Final totals are recalculated on the server in INR and displayed with PKR estimates.
+        Secure test checkout. Final totals are recalculated on the server and shown in PKR.
       </p>
     </aside>
   );

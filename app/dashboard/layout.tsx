@@ -23,12 +23,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="page-shell grid gap-6 py-8 lg:grid-cols-[230px_1fr]">
-      <aside className="panel h-fit p-4">
-        <p className="text-sm font-black uppercase tracking-[0.2em] text-basil">Account</p>
-        <nav className="mt-4 grid gap-2 text-sm font-bold">
+    <div className="page-shell grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[240px_1fr]">
+      <aside className="card h-fit p-4">
+        <p className="text-xs font-bold uppercase tracking-[0.15em] text-basil">Account</p>
+        <nav className="mt-4 grid gap-1 text-sm font-semibold text-inkSoft">
           {links.map(([label, href]) => (
-            <Link key={href} href={href} className="px-3 py-2 hover:bg-coal/5">
+            <Link key={href} href={href} className="rounded-lg px-3 py-2.5 hover:bg-paper hover:text-coal">
               {label}
             </Link>
           ))}

@@ -12,7 +12,7 @@ export const infoPages: InfoPage[] = [
     title: "About 8x Bazaar",
     eyebrow: "Get to Know Us",
     body: "8x Bazaar is a demo marketplace experience for browsing electronics, home goods, fashion, grocery, beauty, and everyday essentials.",
-    bullets: ["Curated product catalog", "INR pricing with regional marketplace styling", "Demo checkout and account flows"]
+    bullets: ["Curated product catalog", "PKR pricing with regional marketplace styling", "Demo checkout and account flows"]
   },
   {
     slug: "careers",
@@ -96,7 +96,7 @@ export const infoPages: InfoPage[] = [
     title: "Payments",
     eyebrow: "Let Us Help You",
     body: "Understand the demo payment flow, currency display, checkout totals, taxes, discounts, and shipping.",
-    bullets: ["Secure test checkout", "Coupons and totals", "INR and PKR display"]
+    bullets: ["Secure test checkout", "Coupons and totals", "PKR price display"]
   },
   {
     slug: "help",

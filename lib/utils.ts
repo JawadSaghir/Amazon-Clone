@@ -20,7 +20,7 @@ export function formatCurrency(value: number, currency: "INR" | "PKR") {
 }
 
 export function formatMoney(valueInr: number) {
-  return `${formatCurrency(valueInr, "INR")} / ${formatCurrency(inrToPkr(valueInr), "PKR")}`;
+  return formatCurrency(inrToPkr(valueInr), "PKR");
 }
 
 export function discountPercent(priceInr: number, mrpInr: number) {

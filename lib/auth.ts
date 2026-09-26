@@ -3,23 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { getAuthSecret } from "@/lib/auth-secret";
-
-const demoUsers = [
-  {
-    id: "demo-customer",
-    name: "Demo Customer",
-    email: "customer@8x.test",
-    role: "CUSTOMER",
-    passwordHash: bcrypt.hashSync("8xDemo!Market2026", 10)
-  },
-  {
-    id: "demo-admin",
-    name: "Demo Admin",
-    email: "admin@8x.test",
-    role: "ADMIN",
-    passwordHash: bcrypt.hashSync("8xDemo!Market2026", 10)
-  }
-];
+import { findAuthUserByEmail } from "@/lib/auth-users";
 
 export const authOptions: NextAuthOptions = {
   secret: getAuthSecret(),
@@ -34,7 +18,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         const email = credentials?.email?.toLowerCase();
         const password = credentials?.password;
-        const user = demoUsers.find((entry) => entry.email === email);
+        const user = email ? findAuthUserByEmail(email) : null;
         if (!user || !password) return null;
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;

@@ -20,9 +20,10 @@ export function ScrollRow({ children, ariaLabel, className }: ScrollRowProps) {
   return (
     <div className="relative">
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => scroll(-1)}
-        className="absolute left-1 top-1/2 z-10 -translate-y-1/2 bg-white/90 px-3 py-7 text-5xl text-coal/55 shadow-panel"
+        className="absolute left-1 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white text-xl text-coal/60 shadow-panel hover:text-coal"
         aria-label={`Previous ${ariaLabel}`}
       >
         ‹
@@ -31,9 +32,10 @@ export function ScrollRow({ children, ariaLabel, className }: ScrollRowProps) {
         {children}
       </div>
       <button
+        suppressHydrationWarning
         type="button"
         onClick={() => scroll(1)}
-        className="absolute right-1 top-1/2 z-10 -translate-y-1/2 bg-white/90 px-3 py-7 text-5xl text-coal/55 shadow-panel"
+        className="absolute right-1 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white text-xl text-coal/60 shadow-panel hover:text-coal"
         aria-label={`Next ${ariaLabel}`}
       >
         ›

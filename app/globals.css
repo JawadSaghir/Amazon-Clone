@@ -4,14 +4,19 @@
 
 :root {
   color-scheme: light;
-  background: #eaeded;
+  background: #f7f4ee;
 }
 
 body {
   min-height: 100vh;
-  background: #eaeded;
-  color: #0f1111;
-  font-family: Arial, "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  background: #f7f4ee;
+  color: #1b1b18;
+  font-family: var(--font-body), Arial, "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.01em;
 }
 
 button,
@@ -26,19 +31,129 @@ textarea {
     @apply mx-auto w-full max-w-amazon;
   }
 
+  /* ---------------------------------------------------------------- *
+   * Liquid glass system                                               *
+   * Frosted, refractive surfaces: translucent gradient fill,          *
+   * backdrop blur + saturation, and an inset "rim light" to fake the  *
+   * way real glass catches light along its top edge.                  *
+   * ---------------------------------------------------------------- */
+
   .panel {
-    @apply rounded-sm border border-[#d5d9d9] bg-white shadow-panel;
+    @apply relative rounded-2xl border border-white/60;
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.62));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+      0 1px 2px rgba(27, 27, 24, 0.05),
+      0 24px 48px -28px rgba(27, 27, 24, 0.28);
+  }
+
+  .card {
+    @apply relative rounded-2xl border border-white/60;
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.7) 100%);
+    backdrop-filter: blur(16px) saturate(165%);
+    -webkit-backdrop-filter: blur(16px) saturate(165%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+      0 1px 2px rgba(27, 27, 24, 0.05);
+    transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
+  }
+
+  .card:hover {
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.8) 100%);
+  }
+
+  /* Dark counterpart for coal-colored blocks (footer, promo bands). */
+  .glass-dark {
+    @apply relative border border-white/10;
+    background: linear-gradient(165deg, rgba(46, 44, 38, 0.92) 0%, rgba(17, 16, 14, 0.96) 100%);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+
+  /* Sticky header glass: lighter blur since it sits over scrolling content. */
+  .glass-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.74) 100%);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow:
+      inset 0 -1px 0 rgba(255, 255, 255, 0.6),
+      0 16px 40px -28px rgba(27, 27, 24, 0.4);
+  }
+
+  .glass-input {
+    @apply border border-white/70;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.55));
+    backdrop-filter: blur(14px) saturate(170%);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .ink-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-amazonOrange px-4 py-2 text-sm font-bold text-coal shadow-brass transition hover:bg-[#fa8900] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-3 text-sm font-bold text-white shadow-panel transition disabled:cursor-not-allowed disabled:opacity-60;
+    background: linear-gradient(165deg, #2e2d29 0%, #1b1b18 65%);
   }
+  .ink-button:hover { background: linear-gradient(165deg, #050505 0%, #000 100%); }
 
   .brass-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-amazonGold px-4 py-2 text-sm font-bold text-coal shadow-brass transition hover:bg-[#f7ca00] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-3 text-sm font-bold text-white shadow-brass transition disabled:cursor-not-allowed disabled:opacity-60;
+    background: linear-gradient(165deg, #c7663b 0%, #b5592a 55%, #8c441f 100%);
+  }
+  .brass-button:hover { background: linear-gradient(165deg, #a94e25 0%, #8c441f 100%); }
+
+  .outline-button {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-white/70 px-5 py-3 text-sm font-bold text-coal transition hover:border-coal/40;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.62));
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  /* Faint top-edge sheen on every pill-shaped control, echoing a glass highlight. */
+  .ink-button::after,
+  .brass-button::after,
+  .outline-button::after,
+  .chip::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 58% 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0));
+    pointer-events: none;
   }
 
   .link-ink {
     @apply font-semibold text-indigoInk hover:text-pomegranate hover:underline;
+  }
+
+  .chip {
+    @apply relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-white/60 px-4 py-2 text-[13px] font-semibold text-coal transition;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.58));
+    backdrop-filter: blur(14px) saturate(165%);
+    -webkit-backdrop-filter: blur(14px) saturate(165%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .chip-active {
+    @apply border-coal text-white;
+    background: linear-gradient(165deg, #2e2d29, #1b1b18);
+    backdrop-filter: none;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold backdrop-blur-sm;
+  }
+
+  .badge-basil {
+    @apply text-basil;
+    background: linear-gradient(180deg, rgba(225, 239, 232, 0.95), rgba(225, 239, 232, 0.68));
+  }
+
+  .badge-accent {
+    @apply text-amazonOrangeDark;
+    background: linear-gradient(180deg, rgba(244, 227, 211, 0.95), rgba(244, 227, 211, 0.68));
   }
 }

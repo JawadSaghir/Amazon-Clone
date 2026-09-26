@@ -17,9 +17,10 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ message: "Invalid checkout payload." }, { status: 400 });
   }
-  const hasUnknownProduct = parsed.data.items.some((item) => !getProductById(item.productId));
+  const products = await Promise.all(parsed.data.items.map((item) => getProductById(item.productId)));
+  const hasUnknownProduct = products.some((product) => !product);
   if (hasUnknownProduct) {
-    return NextResponse.json({ message: "One or more cart items are no longer available." }, { status: 400 });
+    return NextResponse.json({ message: "One or more cart items are old or no longer available. Remove them and add the product again." }, { status: 400 });
   }
 
   const user = await resolveCheckoutUser({
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Authentication required." }, { status: 401 });
   }
 
-  const totals = calculateTotals(parsed.data.items, parsed.data.couponCode);
+  const totals = await calculateTotals(parsed.data.items, parsed.data.couponCode);
   const order = await createCheckoutOrder({
     user,
     items: parsed.data.items,
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     orderId: order.id,
     totals,
-    settlementCurrency: "INR",
+    settlementCurrency: "PKR",
     checkoutUrl: "/checkout/success"
   });
 }

@@ -1,7 +1,6 @@
-import type { Order, OrderItem, User } from "@prisma/client";
+import { MongoClient, ObjectId } from "mongodb";
 
-import { getProductById } from "@/lib/catalog";
-import { prisma } from "@/lib/prisma";
+import { getProductsByIds } from "@/lib/catalog";
 import type { AddressInput, CartLine, OrderTotals } from "@/types";
 
 type CheckoutToken = {
@@ -15,10 +14,6 @@ type CheckoutUser = {
   email: string;
   name: string;
   role: "CUSTOMER" | "ADMIN";
-};
-
-type OrderWithItems = Order & {
-  items: OrderItem[];
 };
 
 type DemoOrderItem = {
@@ -40,7 +35,7 @@ type DemoOrder = {
   shippingInr: number;
   taxInr: number;
   totalInr: number;
-  currency: "INR";
+  currency: "PKR";
   addressSnapshot: AddressInput;
   createdAt: Date;
   items: DemoOrderItem[];
@@ -48,7 +43,72 @@ type DemoOrder = {
 
 type SerializedOrder = ReturnType<typeof serializeOrder>;
 
-const globalForOrders = globalThis as unknown as { demoOrders?: DemoOrder[] };
+type PersistentOrderItem = {
+  id: string;
+  orderId: string;
+  productId: string;
+  titleSnapshot: string;
+  image: string;
+  quantity: number;
+  unitPriceInr: number;
+};
+
+type PersistentOrder = {
+  id: string;
+  userId: string;
+  status: "PENDING";
+  paymentStatus: "UNPAID";
+  subtotalInr: number;
+  discountInr: number;
+  shippingInr: number;
+  taxInr: number;
+  totalInr: number;
+  currency: "PKR";
+  addressSnapshot: AddressInput;
+  createdAt: Date;
+  updatedAt: Date;
+  items: PersistentOrderItem[];
+};
+
+type MongoUserDocument = {
+  _id: ObjectId;
+  email: string;
+  name: string;
+  role: "CUSTOMER" | "ADMIN";
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+type MongoOrderDocument = {
+  _id: ObjectId;
+  userId: ObjectId;
+  status: "PENDING";
+  paymentStatus: "UNPAID";
+  subtotalInr: number;
+  discountInr: number;
+  shippingInr: number;
+  taxInr: number;
+  totalInr: number;
+  currency: "PKR";
+  addressSnapshot: AddressInput;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type MongoOrderItemDocument = {
+  _id: ObjectId;
+  orderId: ObjectId;
+  productId: string;
+  titleSnapshot: string;
+  image: string;
+  quantity: number;
+  unitPriceInr: number;
+};
+
+const globalForOrders = globalThis as unknown as {
+  demoOrders?: DemoOrder[];
+  mongoClientPromise?: Promise<MongoClient>;
+};
 
 function getDemoOrders() {
   globalForOrders.demoOrders ??= [];
@@ -57,6 +117,48 @@ function getDemoOrders() {
 
 function hasDatabaseUrl() {
   return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+async function getMongoClient() {
+  const databaseUrl = process.env.DATABASE_URL?.trim();
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+
+  globalForOrders.mongoClientPromise ??= new MongoClient(databaseUrl).connect();
+  return globalForOrders.mongoClientPromise;
+}
+
+async function getMongoDatabase() {
+  const client = await getMongoClient();
+  return client.db();
+}
+
+function toPersistentOrder(order: MongoOrderDocument, items: MongoOrderItemDocument[]): PersistentOrder {
+  return {
+    id: order._id.toString(),
+    userId: order.userId.toString(),
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    subtotalInr: order.subtotalInr,
+    discountInr: order.discountInr,
+    shippingInr: order.shippingInr,
+    taxInr: order.taxInr,
+    totalInr: order.totalInr,
+    currency: order.currency,
+    addressSnapshot: order.addressSnapshot,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    items: items.map((item) => ({
+      id: item._id.toString(),
+      orderId: item.orderId.toString(),
+      productId: item.productId,
+      titleSnapshot: item.titleSnapshot,
+      image: item.image,
+      quantity: item.quantity,
+      unitPriceInr: item.unitPriceInr
+    }))
+  };
 }
 
 export async function resolveCheckoutUser(token: CheckoutToken): Promise<CheckoutUser | null> {
@@ -70,13 +172,18 @@ export async function resolveCheckoutUser(token: CheckoutToken): Promise<Checkou
     return { id: `demo-${email}`, email, name, role };
   }
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { name, role },
-    create: { email, name, role }
-  });
+  const db = await getMongoDatabase();
+  const users = db.collection<MongoUserDocument>("User");
+  const now = new Date();
+  const existingUser = await users.findOne({ email });
 
-  return { id: user.id, email: user.email, name: user.name, role: user.role };
+  if (existingUser) {
+    await users.updateOne({ _id: existingUser._id }, { $set: { name, role, updatedAt: now } });
+    return { id: existingUser._id.toString(), email: existingUser.email, name, role };
+  }
+
+  const createdUser = await users.insertOne({ _id: new ObjectId(), email, name, role, createdAt: now, updatedAt: now });
+  return { id: createdUser.insertedId.toString(), email, name, role };
 }
 
 export async function createCheckoutOrder(params: {
@@ -85,8 +192,9 @@ export async function createCheckoutOrder(params: {
   totals: OrderTotals;
   address: AddressInput;
 }) {
+  const products = await getProductsByIds(params.items.map((item) => item.productId));
   const itemSnapshots = params.items.map((item) => {
-    const product = getProductById(item.productId);
+    const product = products.find((candidate) => candidate.id === item.productId);
     if (!product) {
       throw new Error(`Unknown product ${item.productId}`);
     }
@@ -111,7 +219,7 @@ export async function createCheckoutOrder(params: {
       shippingInr: params.totals.shippingInr,
       taxInr: params.totals.taxInr,
       totalInr: params.totals.totalInr,
-      currency: "INR",
+      currency: "PKR",
       addressSnapshot: params.address,
       createdAt: new Date(),
       items: itemSnapshots.map((item, index) => ({ id: `${index}-${item.productId}`, ...item }))
@@ -120,20 +228,35 @@ export async function createCheckoutOrder(params: {
     return order;
   }
 
-  return prisma.order.create({
-    data: {
-      userId: params.user.id,
-      subtotalInr: params.totals.subtotalInr,
-      discountInr: params.totals.discountInr,
-      shippingInr: params.totals.shippingInr,
-      taxInr: params.totals.taxInr,
-      totalInr: params.totals.totalInr,
-      currency: "INR",
-      addressSnapshot: params.address,
-      items: { create: itemSnapshots }
-    },
-    include: { items: true }
-  });
+  const db = await getMongoDatabase();
+  const orders = db.collection<MongoOrderDocument>("Order");
+  const orderItems = db.collection<MongoOrderItemDocument>("OrderItem");
+  const now = new Date();
+  const orderId = new ObjectId();
+  const userId = new ObjectId(params.user.id);
+  const orderDocument: MongoOrderDocument = {
+    _id: orderId,
+    userId,
+    status: "PENDING",
+    paymentStatus: "UNPAID",
+    subtotalInr: params.totals.subtotalInr,
+    discountInr: params.totals.discountInr,
+    shippingInr: params.totals.shippingInr,
+    taxInr: params.totals.taxInr,
+    totalInr: params.totals.totalInr,
+    currency: "PKR",
+    addressSnapshot: params.address,
+    createdAt: now,
+    updatedAt: now
+  };
+  const itemDocuments = itemSnapshots.map((item) => ({ _id: new ObjectId(), orderId, ...item }));
+
+  await orders.insertOne(orderDocument);
+  if (itemDocuments.length) {
+    await orderItems.insertMany(itemDocuments);
+  }
+
+  return toPersistentOrder(orderDocument, itemDocuments);
 }
 
 export async function getOrdersForUser(user: CheckoutUser, orderId?: string | null): Promise<SerializedOrder[]> {
@@ -143,23 +266,35 @@ export async function getOrdersForUser(user: CheckoutUser, orderId?: string | nu
       .map((order) => serializeOrder(order, user));
   }
 
-  const orders = await prisma.order.findMany({
-    where: {
-      userId: user.id,
-      ...(orderId ? { id: orderId } : {})
-    },
-    include: { items: true },
-    orderBy: { createdAt: "desc" }
-  });
+  const db = await getMongoDatabase();
+  const orders = db.collection<MongoOrderDocument>("Order");
+  const orderItems = db.collection<MongoOrderItemDocument>("OrderItem");
+  const userId = new ObjectId(user.id);
+  const requestedOrderId = orderId && ObjectId.isValid(orderId) ? new ObjectId(orderId) : null;
+  const orderDocuments = await orders
+    .find({
+      userId,
+      ...(requestedOrderId ? { _id: requestedOrderId } : {})
+    })
+    .sort({ createdAt: -1 })
+    .toArray();
 
-  return orders.map((order) => serializeOrder(order, user));
+  const orderObjectIds = orderDocuments.map((order) => order._id);
+  const itemDocuments = orderObjectIds.length
+    ? await orderItems.find({ orderId: { $in: orderObjectIds } }).toArray()
+    : [];
+
+  return orderDocuments.map((order) => {
+    const items = itemDocuments.filter((item) => item.orderId.equals(order._id));
+    return serializeOrder(toPersistentOrder(order, items), user);
+  });
 }
 
 export function formatOrderNumber(orderId: string) {
   return `8X-${orderId.slice(-6).toUpperCase()}`;
 }
 
-export function serializeOrder(order: OrderWithItems | DemoOrder, user?: Pick<User, "email" | "name"> | CheckoutUser | null) {
+export function serializeOrder(order: PersistentOrder | DemoOrder, user?: Pick<CheckoutUser, "email" | "name"> | null) {
   return {
     id: order.id,
     orderNumber: formatOrderNumber(order.id),

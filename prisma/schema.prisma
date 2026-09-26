@@ -78,6 +78,12 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   reviews     Review[]
+
+  @@index([category, priceInr])
+  @@index([category, rating, reviewCount])
+  @@index([category, isFeatured, reviewCount])
+  @@index([isDeal, createdAt])
+  @@index([isFeatured, reviewCount])
 }
 
 model Order {
@@ -91,7 +97,7 @@ model Order {
   shippingInr     Int
   taxInr          Int
   totalInr        Int
-  currency        String        @default("INR")
+  currency        String        @default("PKR")
   addressSnapshot Json
   items           OrderItem[]
   createdAt       DateTime      @default(now())
