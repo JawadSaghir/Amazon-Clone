@@ -10,7 +10,7 @@ export { categories };
 
 const DEFAULT_PRODUCT_LIMIT = 24;
 const MAX_PRODUCT_LIMIT = 60;
-const DATABASE_FALLBACK_TIMEOUT_MS = 1200;
+const DATABASE_FALLBACK_TIMEOUT_MS = 10000;
 let databaseUnavailable = false;
 let databaseWarningShown = false;
 
@@ -151,7 +151,6 @@ async function withDatabaseFallback<T>(query: () => Promise<T>, fallback: () => 
   });
   const timeoutPromise = new Promise<T>((resolve) => {
     timeout = setTimeout(() => {
-      databaseUnavailable = true;
       if (!databaseWarningShown) {
         console.warn("Database did not respond quickly; using bundled demo products.");
         databaseWarningShown = true;

@@ -124,8 +124,15 @@ async function main() {
       .filter((product) => storefrontCategories.includes(product.category) && product.images.length > 0);
 
     await products.createIndex({ slug: 1 }, { unique: true });
-    await products.deleteMany({});
-    await products.insertMany(mappedProducts);
+    await products.bulkWrite(
+      mappedProducts.map((product) => ({
+        updateOne: {
+          filter: { slug: product.slug },
+          update: { $set: product },
+          upsert: true
+        }
+      }))
+    );
   } finally {
     await client.close();
   }
