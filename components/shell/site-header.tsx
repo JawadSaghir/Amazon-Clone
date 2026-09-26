@@ -2,6 +2,7 @@
 
 import { ChevronDown, MapPin, Menu, Search, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { signOut as nextAuthSignOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
@@ -13,7 +14,7 @@ export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
   const storedCartCount = useCartStore((state) => state.count());
   const cartCount = mounted ? storedCartCount : 0;
-  const { data: session } = useDemoSession();
+  const { data: session, refresh } = useDemoSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -28,14 +29,14 @@ export function SiteHeader() {
   }
 
   async function signOut() {
-    const response = await fetch("/api/auth/csrf");
-    const { csrfToken } = (await response.json()) as { csrfToken: string };
-    await fetch("/api/auth/signout?json=true", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ csrfToken, callbackUrl: "/", json: "true" })
-    });
-    window.location.assign("/");
+    try {
+      await nextAuthSignOut({ callbackUrl: "/", redirect: false });
+      await refresh();
+      router.replace("/");
+      router.refresh();
+    } catch {
+      window.location.assign("/api/auth/signout?callbackUrl=/");
+    }
   }
 
   const SearchForm = ({ compact = false }: { compact?: boolean }) => (
