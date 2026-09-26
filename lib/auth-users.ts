@@ -63,7 +63,12 @@ async function authUsersCollection(): Promise<Collection<DbAuthUser> | null> {
   const databaseUrl = process.env.DATABASE_URL?.trim();
   if (!databaseUrl) return null;
 
-  const client = globalForMongo.authMongoClient ?? new MongoClient(databaseUrl);
+  const client =
+    globalForMongo.authMongoClient ??
+    new MongoClient(databaseUrl, {
+      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 5000
+    });
   if (!globalForMongo.authMongoClient) {
     await client.connect();
     globalForMongo.authMongoClient = client;
