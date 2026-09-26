@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs";
 
+import { prisma } from "@/lib/prisma";
+
 export type AuthUser = {
   id: string;
   name: string;
@@ -27,6 +29,10 @@ const demoUsers: AuthUser[] = [
 
 const globalForUsers = globalThis as unknown as { registeredUsers?: AuthUser[] };
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 function registeredUsers() {
   if (!globalForUsers.registeredUsers) {
     globalForUsers.registeredUsers = [];
@@ -34,15 +40,85 @@ function registeredUsers() {
   return globalForUsers.registeredUsers;
 }
 
-export function findAuthUserByEmail(email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
+function localAuthUserByEmail(email: string) {
+  const normalizedEmail = normalizeEmail(email);
   return [...demoUsers, ...registeredUsers()].find((user) => user.email === normalizedEmail) ?? null;
 }
 
+function databaseEnabled() {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+function mapRole(role: string): AuthUser["role"] {
+  return role === "ADMIN" ? "ADMIN" : "CUSTOMER";
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
+async function findDatabaseAuthUserByEmail(email: string) {
+  if (!databaseEnabled()) return null;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: normalizeEmail(email) }
+    });
+
+    if (!user?.passwordHash) return null;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: mapRole(user.role),
+      passwordHash: user.passwordHash
+    } satisfies AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+export async function findAuthUserByEmail(email: string) {
+  return localAuthUserByEmail(email) ?? (await findDatabaseAuthUserByEmail(email));
+}
+
 export async function createAuthUser(input: { name: string; email: string; password: string }) {
-  const normalizedEmail = input.email.trim().toLowerCase();
-  if (findAuthUserByEmail(normalizedEmail)) {
+  const normalizedEmail = normalizeEmail(input.email);
+  const localUser = localAuthUserByEmail(normalizedEmail);
+  if (localUser) {
     return { user: null, error: "An account with this email already exists." };
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, 10);
+  if (databaseEnabled()) {
+    try {
+      const user = await prisma.user.create({
+        data: {
+          name: input.name.trim(),
+          email: normalizedEmail,
+          passwordHash,
+          role: "CUSTOMER"
+        }
+      });
+
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: mapRole(user.role),
+          passwordHash: user.passwordHash ?? passwordHash
+        } satisfies AuthUser,
+        error: null
+      };
+    } catch (error) {
+      if (isUniqueConstraintError(error)) {
+        return { user: null, error: "An account with this email already exists." };
+      }
+
+      return { user: null, error: "We could not create your account right now. Please try again." };
+    }
   }
 
   const user: AuthUser = {
@@ -50,7 +126,7 @@ export async function createAuthUser(input: { name: string; email: string; passw
     name: input.name.trim(),
     email: normalizedEmail,
     role: "CUSTOMER",
-    passwordHash: await bcrypt.hash(input.password, 10)
+    passwordHash
   };
 
   registeredUsers().push(user);
