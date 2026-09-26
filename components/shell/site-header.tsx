@@ -67,10 +67,7 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="glass-header sticky top-0 z-50 border-b border-white/40">
-      <div className="glass-dark hidden h-9 items-center justify-center gap-2 text-center text-[12.5px] font-semibold text-paper/90 sm:flex">
-        Free delivery over &#8377;1,999 &middot; 10-day easy returns &middot; Pay in INR, see the PKR estimate
-      </div>
+    <header className="glass-header sticky top-0 z-50 border-b border-line">
       <div className="flex h-[84px] w-full items-center gap-6 px-4 sm:px-8">
         <Link href="/" className="flex shrink-0 items-baseline gap-0.5 font-display text-[26px] font-bold text-coal" aria-label="8x Bazaar home">
           8x<span className="text-amazonOrange">bazaar</span>
@@ -123,7 +120,7 @@ export function SiteHeader() {
         <SearchForm compact />
       </div>
 
-      <nav className="hidden h-[52px] items-center gap-1 border-t border-lineSoft px-4 sm:px-8 md:flex">
+      <nav className="hidden h-[52px] items-center gap-1 border-t border-line px-4 sm:px-8 md:flex">
         <Link href="/search" className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[13.5px] font-bold text-coal hover:bg-paper">
           <Menu className="h-4 w-4" />
           All categories

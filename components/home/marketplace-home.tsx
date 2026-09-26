@@ -7,91 +7,6 @@ import { categories, getAllProducts, getProducts } from "@/lib/catalog";
 import { discountPercent, formatMoney } from "@/lib/utils";
 import type { Product } from "@/types";
 
-function CategoryIcon({ category }: { category: string }) {
-  const common = {
-    width: 21,
-    height: 21,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.8
-  } as const;
-
-  switch (category) {
-    case "Mobiles":
-      return (
-        <svg {...common}>
-          <rect x="7" y="2" width="10" height="20" rx="2" />
-          <path d="M11 18h2" />
-        </svg>
-      );
-    case "Computing":
-      return (
-        <svg {...common}>
-          <rect x="4" y="4" width="16" height="11" rx="1.5" />
-          <path d="M2 19h20l-1.6-3H3.6z" />
-        </svg>
-      );
-    case "Fashion":
-      return (
-        <svg {...common}>
-          <path d="M9 4l3 2 3-2 4 3-2 3v10H7V10L5 7z" />
-        </svg>
-      );
-    case "Home":
-      return (
-        <svg {...common}>
-          <path d="M4 11l8-7 8 7" />
-          <path d="M6 10v9h12v-9" />
-        </svg>
-      );
-    case "Kitchen":
-    case "Kitchen Accessories":
-      return (
-        <svg {...common}>
-          <path d="M6 2v7a3 3 0 0 0 6 0V2" />
-          <path d="M9 9v13" />
-          <path d="M17 2c-2 2-2 6 0 8v11" />
-        </svg>
-      );
-    case "Beauty":
-      return (
-        <svg {...common}>
-          <path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" />
-        </svg>
-      );
-    case "Grocery":
-      return (
-        <svg {...common}>
-          <path d="M4 9h16l-1.5 10.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5z" />
-          <path d="M8 9V6a4 4 0 0 1 8 0v3" />
-        </svg>
-      );
-    case "Gaming":
-      return (
-        <svg {...common}>
-          <rect x="2" y="8" width="20" height="10" rx="5" />
-          <path d="M7 11v4M5 13h4" />
-          <circle cx="16" cy="11.5" r="1" />
-          <circle cx="18.5" cy="14" r="1" />
-        </svg>
-      );
-    case "Sports":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18" />
-        </svg>
-      );
-    default:
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8" />
-        </svg>
-      );
-  }
-}
-
 function productAt(products: Product[], index: number) {
   return products[index % products.length];
 }
@@ -131,11 +46,18 @@ export async function MarketplaceHome() {
     productInCategory(products, ["Computing", "Laptops"], 5),
     productInCategory(products, ["Grocery", "Groceries"], 4)
   ];
+  const heroProducts = [
+    productInCategory(products, ["Womens Dresses", "Mens Shoes"], 2),
+    productInCategory(products, ["Smartphones"], 0),
+    homeFeature,
+    productInCategory(products, ["Laptops"], 5)
+  ];
   const lowerModules = [productInCategory(products, ["Sports", "Sports Accessories"], 6), productInCategory(products, ["Beauty"], 7)];
 
   return (
     <div className="bg-paper">
-      <Hero product={homeFeature} />
+      <CategoryImageStrip products={products} />
+      <Hero products={heroProducts} />
       <TrustStrip />
 
       <section className="page-shell relative z-20 grid gap-6 px-4 pb-6 pt-10 sm:px-8 md:grid-cols-2 xl:grid-cols-4">
@@ -154,24 +76,6 @@ export async function MarketplaceHome() {
         <ShoppingModule title="Everyday grocery picks" action="Shop Grocery" href="/search?category=Grocery">
           <ModuleImage src={homeModules[3].images[0]} alt={homeModules[3].title} className="h-[280px]" />
         </ShoppingModule>
-      </section>
-
-      <section className="page-shell px-4 pb-8 sm:px-8">
-        <h2 className="mb-4 text-sm font-bold text-inkSoft">Shop by category</h2>
-        <div className="panel flex flex-wrap items-center gap-3 px-4 py-5">
-          {categories.map((category) => (
-            <Link
-              key={category}
-              href={`/search?category=${encodeURIComponent(category)}`}
-              className="flex w-[104px] flex-col items-center gap-2 rounded-xl px-2 py-2 text-center hover:bg-white/50"
-            >
-              <span className="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-white text-coal/70 shadow-panel">
-                <CategoryIcon category={category} />
-              </span>
-              <span className="text-xs font-semibold leading-tight text-coal">{category}</span>
-            </Link>
-          ))}
-        </div>
       </section>
 
       <ProductShelf title="Best sellers this week" products={bestSellers} />
@@ -253,60 +157,65 @@ export async function MarketplaceHome() {
   );
 }
 
-function Hero({ product }: { product: Product }) {
-  const discount = discountPercent(product.priceInr, product.mrpInr);
-  const categoryHref = `/search?category=${encodeURIComponent(product.category)}`;
-
+function CategoryImageStrip({ products }: { products: Product[] }) {
   return (
     <section className="page-shell px-4 pt-6 sm:px-8">
-      <div
-        className="relative grid min-h-[520px] overflow-hidden rounded-2xl bg-[#181611] sm:grid-cols-[1fr_0.92fr]"
-        style={{ background: "linear-gradient(135deg, #17140f 0%, #292016 48%, #5b3b23 100%)" }}
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(16,15,12,0.82) 0%, rgba(24,22,17,0.56) 45%, rgba(24,22,17,0.18) 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0, rgba(255,255,255,0.055) 1px, transparent 1px, transparent 92px)"
-          }}
-        />
-        <div className="absolute bottom-0 right-0 h-40 w-2/3 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.28))]" />
+      <div className="flex gap-7 overflow-x-auto rounded-2xl border border-line bg-white px-6 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {categories.map((category, index) => {
+          const product = productInCategory(products, [category], index);
+          return (
+            <Link
+              key={category}
+              href={`/search?category=${encodeURIComponent(category)}`}
+              className="group flex w-[96px] shrink-0 flex-col items-center gap-2 text-center"
+            >
+              <span className="grid h-[76px] w-[76px] place-items-center overflow-hidden rounded-full border border-line bg-paper transition group-hover:border-amazonOrange">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={product.images[0]} alt={category} className="h-full w-full object-contain p-2 transition group-hover:scale-105" />
+              </span>
+              <span className="text-xs font-bold leading-tight text-coal">{category}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
-        <div className="relative z-10 flex flex-col justify-center gap-5 px-6 py-12 sm:px-12">
-          <span className="badge w-fit bg-white/90 text-amazonOrangeDark">Kitchen edit</span>
-          <h1 className="max-w-[440px] font-display text-3xl font-semibold leading-[1.05] text-white sm:text-[44px]">
-            Cookware for everyday dinners
+function Hero({ products }: { products: Product[] }) {
+  return (
+    <section className="page-shell px-4 pt-6 sm:px-8">
+      <div className="grid overflow-hidden rounded-2xl border border-line bg-[#f5ecdd] lg:grid-cols-[0.78fr_1fr]">
+        <div className="flex flex-col justify-center gap-5 px-7 py-12 sm:px-10 lg:min-h-[430px]">
+          <span className="badge w-fit bg-accentTint text-amazonOrangeDark">Today's picks</span>
+          <h1 className="max-w-[560px] font-display text-4xl font-semibold leading-[1.04] text-coal sm:text-[52px]">
+            Shop fresh finds for home, tech and everyday life
           </h1>
-          <p className="max-w-sm text-sm leading-relaxed text-white/65">
-            Practical pans, prep tools and small appliances selected for busy kitchens, priced in INR with a PKR estimate at checkout.
+          <p className="max-w-md text-sm leading-relaxed text-coal/70">
+            Discover deals across mobiles, computing, kitchen and more with fast demo checkout.
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-1">
-            <Link href={categoryHref} className="brass-button">
-              Shop kitchen
+            <Link href="/search?deal=flash" className="brass-button">
+              Shop deals
             </Link>
-            <Link href={categoryHref} className="flex items-center gap-1.5 text-sm font-semibold text-white">
-              Explore {product.category}
+            <Link href="/search" className="outline-button border-line">
+              Browse catalog
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        <div className="relative z-10 hidden items-center justify-center p-8 sm:flex">
-          <Link
-            href={`/products/${product.slug}`}
-            className="w-full max-w-[300px] rounded-2xl border border-white/30 bg-[#f8f3e8] p-4 text-coal shadow-[0_32px_70px_-28px_rgba(0,0,0,0.72)]"
-          >
-            <div className="aspect-[4/3] overflow-hidden rounded-xl bg-white">
+        <div className="grid gap-3 bg-[#eadbc7] p-7 sm:grid-cols-2">
+          {products.map((product) => (
+            <Link
+              key={product.id}
+              href={`/products/${product.slug}`}
+              className="group flex min-h-[164px] items-center justify-center overflow-hidden rounded-2xl border border-line bg-[#f6efe4]"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={product.images[0]} alt={product.title} className="h-full w-full object-contain p-3" />
-            </div>
-            <p className="mt-3 text-[11px] font-bold uppercase text-muted">{product.brand}</p>
-            <p className="mt-1 text-sm font-semibold leading-snug text-coal">{product.title}</p>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="font-display text-lg font-semibold text-coal">{formatMoney(product.priceInr)}</span>
-              {discount > 0 && <span className="text-xs text-muted line-through">{formatMoney(product.mrpInr)}</span>}
-            </div>
-          </Link>
+              <img src={product.images[0]} alt={product.title} className="max-h-[180px] w-full object-contain p-5 transition duration-200 group-hover:scale-105" />
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -322,7 +231,7 @@ function TrustStrip() {
   ];
 
   return (
-    <section className="page-shell relative z-20 -mt-8 px-4 sm:px-8">
+    <section className="page-shell px-4 pt-6 sm:px-8">
       <div className="card grid divide-y divide-lineSoft sm:grid-cols-4 sm:divide-x sm:divide-y-0">
         {items.map((item) => (
           <div key={item.title} className="flex items-center gap-3 p-5">
